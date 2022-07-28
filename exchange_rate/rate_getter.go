@@ -1,4 +1,4 @@
-package main
+package exchange_rate
 
 import (
 	"encoding/json"
@@ -39,8 +39,8 @@ func getRate(currencyFrom, currencyTo string) (float64, error) {
 	return result.Rate, nil
 }
 
-// getBtcUahRate returns a Bitcoin to Ukrainian Hryvnia exchange rate,
+// GetBtcUahRate returns a Bitcoin to Ukrainian Hryvnia exchange rate,
 // using getRate as a helper function.
-func getBtcUahRate() (float64, error) {
+func GetBtcUahRate() (float64, error) {
 	return getRate("BTC", "UAH")
 }
