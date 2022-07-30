@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gses2.app/api/data"
 	"gses2.app/api/exchange_rate"
-	"net/smtp"
+	"gses2.app/api/smtp"
 	"os"
 )
 
