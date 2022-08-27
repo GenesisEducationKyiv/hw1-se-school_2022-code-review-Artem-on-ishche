@@ -3,8 +3,8 @@ package emails
 import (
 	"fmt"
 	"gses2.app/api/data"
+	"gses2.app/api/emails/smtp"
 	"gses2.app/api/exchange_rate"
-	"gses2.app/api/smtp"
 	"os"
 )
 
