@@ -17,8 +17,8 @@ COPY data/*.go ./data/
 RUN mkdir emails
 COPY emails/*.go ./emails/
 
-RUN mkdir exchange_rate
-COPY exchange_rate/*.go ./exchange_rate/
+RUN mkdir rate
+COPY rate/*.go ./rate/
 
 RUN mkdir smtp
 COPY emails/smtp/*.go ./smtp/

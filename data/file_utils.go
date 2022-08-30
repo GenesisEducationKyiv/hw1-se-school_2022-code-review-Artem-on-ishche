@@ -1,11 +1,13 @@
 package data
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
-// safelyClose loops while the file is not closed successfully.
 func safelyClose(file *os.File) {
 	err := file.Close()
-	for err != nil {
-		err = file.Close()
+	if err != nil {
+		log.Fatal("Problem with closing a data file.")
 	}
 }
