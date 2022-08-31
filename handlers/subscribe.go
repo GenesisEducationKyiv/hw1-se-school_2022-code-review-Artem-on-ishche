@@ -10,7 +10,7 @@ import (
 
 var errMissingParameter = errors.New("required parameter is missing")
 
-func SubscribeHandler(responseWriter http.ResponseWriter, request *http.Request) {
+func subscribeHandler(responseWriter http.ResponseWriter, request *http.Request) {
 	email, err := getEmailParameter(request)
 	if err != nil {
 		sendBadRequestResponse(responseWriter, "Bad Request")

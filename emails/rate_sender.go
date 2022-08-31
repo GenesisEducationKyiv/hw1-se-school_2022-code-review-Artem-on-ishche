@@ -8,7 +8,7 @@ import (
 	"gses2.app/api/emails/smtp"
 )
 
-func SendRate(rate float64) error {
+func SendEmailsAboutRate(rate float64) error {
 	emailAddresses := data.GetEmailAddresses()
 	message := []byte(fmt.Sprintf("Зараз 1 біткоїн коштує %v грн\n", rate)) // convert to string and then to []byte
 

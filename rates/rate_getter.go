@@ -1,4 +1,4 @@
-package rate
+package rates
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"gses2.app/api/config"
 )
 
-type response struct {
+type receivedAPIResponse struct {
 	Time         string  `json:"time"`
 	AssetIDBase  string  `json:"asset_id_base"`
 	AssetIDQuote string  `json:"asset_id_quote"`
@@ -27,7 +27,7 @@ func getRate(currencyFrom, currencyTo string) (float64, error) {
 		return -1, err
 	}
 
-	var result response
+	var result receivedAPIResponse
 
 	err = json.Unmarshal(resp.Body, &result)
 	if err != nil {

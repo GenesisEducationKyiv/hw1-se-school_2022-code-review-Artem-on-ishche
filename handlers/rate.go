@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"gses2.app/api/rate"
+	"gses2.app/api/rates"
 )
 
-func RateHandler(responseWriter http.ResponseWriter, _ *http.Request) {
-	exchangeRate, err := rate.GetBtcToUahRate()
+func rateHandler(responseWriter http.ResponseWriter, _ *http.Request) {
+	exchangeRate, err := rates.GetBtcToUahRate()
 	if isRateWrong(exchangeRate, err) {
 		sendBadRequestResponse(responseWriter, "An error has occurred")
 
