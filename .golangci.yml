@@ -1,0 +1,38 @@
+run:
+  skip-dirs:
+    - emails/smtp
+linters:
+  enable-all: true
+  disable:
+    - structcheck
+    - scopelint
+    - deadcode
+    - exhaustivestruct
+    - interfacer
+    - golint
+    - maligned
+    - varcheck
+    - ifshort
+    - nosnakecase
+    - gofmt
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+    - goimports
+    - gochecknoglobals
+    - gosec
+    - wrapcheck
+linters-settings:
+  wsl:
+    force-err-cuddling: true
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(gses2.app/api)
+      - blank
+      - dot
