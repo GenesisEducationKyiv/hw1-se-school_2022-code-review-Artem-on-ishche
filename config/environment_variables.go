@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	Port          string
+	NetworkPort   string
 	Filename      string
 	APIKeyValue   string
 	EmailAddress  string
@@ -28,7 +28,7 @@ func loadFile() {
 }
 
 func loadVariables() {
-	Port = os.Getenv("NETWORK_PORT")
+	NetworkPort = os.Getenv("NETWORK_PORT")
 	Filename = os.Getenv("FILENAME")
 	APIKeyValue = os.Getenv("API_KEY")
 	EmailAddress = os.Getenv("EMAIL_ADDRESS")

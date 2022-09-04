@@ -2,35 +2,37 @@ package handlers
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
-	"gses2.app/api/data"
+	"gses2.app/api/services"
 )
+
+var EmailAddressesStorageImpl services.EmailAddressesStorage
+var SubscribeRequestHandler = subscribeRequestHandler{}
+
+type subscribeRequestHandler struct{}
 
 var errMissingParameter = errors.New("required parameter is missing")
 
-func subscribeHandler(responseWriter http.ResponseWriter, request *http.Request) {
-	email, err := getEmailParameter(request)
+func (h subscribeRequestHandler) HandleRequest(request *http.Request) httpResponse {
+	emailAddressString, err := getEmailParameter(request)
 	if err != nil {
-		sendBadRequestResponse(responseWriter, "Bad Request")
-
-		return
+		return newHttpResponse(http.StatusBadRequest, "Required parameter 'email' is missing")
 	}
 
-	isEmailAlreadySaved := data.IsEmailAddressSaved(email)
-	if isEmailAlreadySaved {
-		sendConflictResponse(responseWriter, "This email address is already saved")
-
-		return
-	}
-
-	err = data.AddEmailAddress(email)
+	emailAddress, err := services.NewEmailAddress(emailAddressString)
 	if err != nil {
-		log.Fatal("Failed to add an email")
+		return newHttpResponse(http.StatusBadRequest, "Provided email address is wrong")
 	}
 
-	sendSuccessResponse(responseWriter, "Success")
+	err = services.AddEmailAddress(EmailAddressesStorageImpl, *emailAddress)
+	if isEmailAlreadySaved(err, emailAddressString) {
+		return newHttpResponse(http.StatusConflict, "This email address is already saved")
+	} else if err != nil {
+		return newHttpResponse(http.StatusBadRequest, "Error when saving the email address")
+	}
+
+	return newHttpResponse(http.StatusOK, "Success")
 }
 
 func getEmailParameter(request *http.Request) (string, error) {
@@ -45,4 +47,8 @@ func getEmailParameter(request *http.Request) (string, error) {
 
 func hasRequiredParameter(emailParams []string, ok bool) bool {
 	return ok && len(emailParams[0]) > 0
+}
+
+func isEmailAlreadySaved(err error, emailAddressString string) bool {
+	return err == services.ErrEmailAddressAlreadyExists(emailAddressString)
 }

@@ -4,19 +4,29 @@ import (
 	"fmt"
 	"net/http"
 
-	"gses2.app/api/rates"
+	"gses2.app/api/services"
 )
 
-func rateHandler(responseWriter http.ResponseWriter, _ *http.Request) {
-	exchangeRate, err := rates.GetBtcToUahRate()
-	if isRateWrong(exchangeRate, err) {
-		sendBadRequestResponse(responseWriter, "An error has occurred")
+var ExchangeRateServiceImpl services.ExchangeRateService
+var RateRequestHandler = rateRequestHandler{}
 
-		return
+type rateRequestHandler struct{}
+
+func (h rateRequestHandler) HandleRequest(_ *http.Request) httpResponse {
+	exchangeRate, err := services.GetBtcToUahRate(ExchangeRateServiceImpl)
+
+	if !isApiRequestSuccessful(err) {
+		return newHttpResponse(http.StatusBadRequest, "API request has not been successful")
+	} else if isRateWrong(exchangeRate, err) {
+		return newHttpResponse(http.StatusBadRequest, "Some unexpected error has occurred")
+	} else {
+		rateString := fmt.Sprintf("%v", exchangeRate)
+		return newHttpResponse(http.StatusOK, rateString)
 	}
+}
 
-	rateString := fmt.Sprintf("%v", exchangeRate)
-	sendSuccessResponse(responseWriter, rateString)
+func isApiRequestSuccessful(err error) bool {
+	return err != services.ErrApiRequestUnsuccessful
 }
 
 func isRateWrong(rate float64, err error) bool {
