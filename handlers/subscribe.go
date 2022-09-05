@@ -7,14 +7,17 @@ import (
 	"gses2.app/api/services"
 )
 
-var EmailAddressesStorageImpl services.EmailAddressesStorage
-var SubscribeRequestHandler = subscribeRequestHandler{}
-
-type subscribeRequestHandler struct{}
-
 var errMissingParameter = errors.New("required parameter is missing")
 
-func (h subscribeRequestHandler) HandleRequest(request *http.Request) httpResponse {
+type subscribeRequestHandler struct {
+	addEmailAddressService services.AddEmailAddressService
+}
+
+func NewSubscribeRequestHandler(addEmailAddressService services.AddEmailAddressService) RequestHandler {
+	return subscribeRequestHandler{addEmailAddressService}
+}
+
+func (handler subscribeRequestHandler) HandleRequest(request *http.Request) httpResponse {
 	emailAddressString, err := getEmailParameter(request)
 	if err != nil {
 		return newHttpResponse(http.StatusBadRequest, "Required parameter 'email' is missing")
@@ -25,14 +28,15 @@ func (h subscribeRequestHandler) HandleRequest(request *http.Request) httpRespon
 		return newHttpResponse(http.StatusBadRequest, "Provided email address is wrong")
 	}
 
-	err = services.AddEmailAddress(EmailAddressesStorageImpl, *emailAddress)
-	if isEmailAlreadySaved(err, emailAddressString) {
-		return newHttpResponse(http.StatusConflict, "This email address is already saved")
-	} else if err != nil {
-		return newHttpResponse(http.StatusBadRequest, "Error when saving the email address")
-	}
+	err = handler.addEmailAddressService.AddEmailAddress(*emailAddress)
 
-	return newHttpResponse(http.StatusOK, "Success")
+	if err == nil {
+		return newHttpResponse(http.StatusOK, "Success")
+	} else if isEmailAlreadySaved(err, emailAddressString) {
+		return newHttpResponse(http.StatusConflict, "This email address is already saved")
+	} else {
+		return newHttpResponse(http.StatusInternalServerError, "Error when saving the email address")
+	}
 }
 
 func getEmailParameter(request *http.Request) (string, error) {
@@ -50,5 +54,5 @@ func hasRequiredParameter(emailParams []string, ok bool) bool {
 }
 
 func isEmailAlreadySaved(err error, emailAddressString string) bool {
-	return err == services.ErrEmailAddressAlreadyExists(emailAddressString)
+	return err.Error() == services.ErrEmailAddressAlreadyExists(emailAddressString).Error()
 }

@@ -7,28 +7,23 @@ import (
 	"gses2.app/api/services"
 )
 
-var ExchangeRateServiceImpl services.ExchangeRateService
-var RateRequestHandler = rateRequestHandler{}
+type btcToUahRateRequestHandler struct {
+	btcToUahService services.BtcToUahRateService
+}
 
-type rateRequestHandler struct{}
+func NewBtcToUahRateRequestHandler(btcToUahService services.BtcToUahRateService) RequestHandler {
+	return btcToUahRateRequestHandler{btcToUahService}
+}
 
-func (h rateRequestHandler) HandleRequest(_ *http.Request) httpResponse {
-	exchangeRate, err := services.GetBtcToUahRate(ExchangeRateServiceImpl)
+func (handler btcToUahRateRequestHandler) HandleRequest(_ *http.Request) httpResponse {
+	exchangeRate, err := handler.btcToUahService.GetBtcToUahRate()
 
-	if !isApiRequestSuccessful(err) {
-		return newHttpResponse(http.StatusBadRequest, "API request has not been successful")
-	} else if isRateWrong(exchangeRate, err) {
-		return newHttpResponse(http.StatusBadRequest, "Some unexpected error has occurred")
-	} else {
-		rateString := fmt.Sprintf("%v", exchangeRate)
-		return newHttpResponse(http.StatusOK, rateString)
+	switch err {
+	case nil:
+		return newHttpResponse(http.StatusOK, fmt.Sprintf("%v", exchangeRate))
+	case services.ErrApiRequestUnsuccessful:
+		return newHttpResponse(http.StatusBadGateway, "API request has not been successful")
+	default:
+		return newHttpResponse(http.StatusInternalServerError, "Some unexpected error has occurred")
 	}
-}
-
-func isApiRequestSuccessful(err error) bool {
-	return err != services.ErrApiRequestUnsuccessful
-}
-
-func isRateWrong(rate float64, err error) bool {
-	return err != nil || rate <= 0
 }

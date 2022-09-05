@@ -6,20 +6,23 @@ import (
 	"gses2.app/api/services"
 )
 
-var EmailSenderImpl services.EmailSender
-var SendEmailsRequestHandler = sendEmailsRequestHandler{}
+type sendEmailsRequestHandler struct {
+	sendBtcToUahRateEmailsService services.SendBtcToUahRateEmailsService
+}
 
-type sendEmailsRequestHandler struct{}
+func NewSendEmailsRequestHandler(sendBtcToUahRateEmailsService services.SendBtcToUahRateEmailsService) RequestHandler {
+	return sendEmailsRequestHandler{sendBtcToUahRateEmailsService}
+}
 
-func (h sendEmailsRequestHandler) HandleRequest(request *http.Request) httpResponse {
-	err := services.SendBtcToUahRateEmails(ExchangeRateServiceImpl, EmailAddressesStorageImpl, EmailSenderImpl)
+func (handler sendEmailsRequestHandler) HandleRequest(request *http.Request) httpResponse {
+	err := handler.sendBtcToUahRateEmailsService.SendBtcToUahRateEmails()
 
 	switch err {
 	case nil:
 		return newHttpResponse(http.StatusOK, "Success")
 	case services.ErrApiRequestUnsuccessful:
-		return newHttpResponse(http.StatusBadRequest, "API request has not been successful")
+		return newHttpResponse(http.StatusBadGateway, "API request has not been successful")
 	default:
-		return newHttpResponse(http.StatusBadRequest, "Some error has occurred")
+		return newHttpResponse(http.StatusInternalServerError, "Some error has occurred")
 	}
 }
