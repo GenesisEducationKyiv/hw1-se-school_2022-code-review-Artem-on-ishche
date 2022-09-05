@@ -1,8 +1,9 @@
 package services
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type getRateFunction func(from, to Currency) (float64, error)
@@ -58,14 +59,15 @@ var generalGetRateTests = []getRateTest{
 	},
 }
 
-func TestGetBtcToUahRate(t *testing.T) {
+func TestThatGetBtcToUahRateReturnsCorrectValues(t *testing.T) {
 	fakeService := exchangeRateServiceTestDouble{}
+	btcToUahServiceImpl := NewBtcToUahServiceImpl(&fakeService)
 
 	for _, test := range generalGetRateTests {
 		getRateTestFunction = test.function
 		expectedResult := test.expectedReturn
 
-		rate, err := GetBtcToUahRate(&fakeService)
+		rate, err := btcToUahServiceImpl.GetBtcToUahRate()
 
 		assert.Equal(t, expectedResult.rate, rate)
 		assert.Equal(t, expectedResult.err, err)
@@ -74,6 +76,7 @@ func TestGetBtcToUahRate(t *testing.T) {
 
 func TestThatGetBtcToUahCallsRateServiceWithCorrectParameters(t *testing.T) {
 	spyService := exchangeRateServiceTestDouble{}
+	btcToUahServiceImpl := NewBtcToUahServiceImpl(&spyService)
 
 	callsCount := 0
 	var fromCurrencyName, toCurrencyName string
@@ -86,7 +89,7 @@ func TestThatGetBtcToUahCallsRateServiceWithCorrectParameters(t *testing.T) {
 		return 1, nil
 	}
 
-	_, _ = GetBtcToUahRate(&spyService)
+	_, _ = btcToUahServiceImpl.GetBtcToUahRate()
 
 	assert.Equal(t, 1, callsCount)
 	assert.Equal(t, "BTC", fromCurrencyName)

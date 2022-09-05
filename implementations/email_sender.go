@@ -1,8 +1,8 @@
-package emails
+package implementations
 
 import (
 	"gses2.app/api/config"
-	"gses2.app/api/emails/smtp"
+	"gses2.app/api/implementations/smtp"
 	"gses2.app/api/services"
 )
 
@@ -13,11 +13,13 @@ type emailClient struct {
 	smtpPort      string
 }
 
-var EmailClient = emailClient{
-	emailAddress:  config.EmailAddress,
-	emailPassword: config.EmailPassword,
-	smtpHost:      config.SMTPHost,
-	smtpPort:      config.SMTPPort,
+func GetEmailClient() services.EmailSender {
+	return &emailClient{
+		emailAddress:  config.EmailAddress,
+		emailPassword: config.EmailPassword,
+		smtpHost:      config.SMTPHost,
+		smtpPort:      config.SMTPPort,
+	}
 }
 
 func (emailClient *emailClient) SendEmails(email services.Email, receiverAddresses []string) error {

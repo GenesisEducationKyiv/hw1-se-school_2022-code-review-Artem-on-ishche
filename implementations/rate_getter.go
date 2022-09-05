@@ -1,4 +1,4 @@
-package rates
+package implementations
 
 import (
 	"encoding/json"
@@ -11,23 +11,25 @@ import (
 	"gses2.app/api/services"
 )
 
+type receivedAPIResponse struct {
+	Time         string  `json:"time"`
+	AssetIDBase  string  `json:"asset_id_base"`
+	AssetIDQuote string  `json:"asset_id_quote"`
+	Rate         float64 `json:"rate"`
+}
+
 type exchangeRateApiClient struct {
 	apiRequestFormat string
 	apiKeyHeader     string
 	apiKeyValue      string
 }
 
-var ExchangeRateCoinApiClient = exchangeRateApiClient{
-	apiRequestFormat: config.APIRequestFormat,
-	apiKeyHeader:     config.APIKeyHeader,
-	apiKeyValue:      config.APIKeyValue,
-}
-
-type receivedAPIResponse struct {
-	Time         string  `json:"time"`
-	AssetIDBase  string  `json:"asset_id_base"`
-	AssetIDQuote string  `json:"asset_id_quote"`
-	Rate         float64 `json:"rate"`
+func GetExchangeRateCoinApiClient() services.ExchangeRateService {
+	return &exchangeRateApiClient{
+		apiRequestFormat: config.APIRequestFormat,
+		apiKeyHeader:     config.APIKeyHeader,
+		apiKeyValue:      config.APIKeyValue,
+	}
 }
 
 func (client *exchangeRateApiClient) GetExchangeRate(from, to services.Currency) (float64, error) {

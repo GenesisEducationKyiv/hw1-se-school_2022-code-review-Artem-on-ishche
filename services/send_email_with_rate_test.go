@@ -2,8 +2,9 @@ package services
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type sendEmailsFunction func(email Email, receiverAddresses []string) error
@@ -29,8 +30,9 @@ func TestThatEmailSenderIsCalled(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToCountCalls()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
+	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
-	_ = SendBtcToUahRateEmails(rateService, storage, sender)
+	_ = sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.Equal(t, 1, sendEmailsCallCount)
 }
@@ -40,8 +42,9 @@ func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(rate)
 	setSendEmailsTestFunctionToSaveEmailBody()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
+	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
-	_ = SendBtcToUahRateEmails(rateService, storage, sender)
+	_ = sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.Contains(t, emailBodyInTest, fmt.Sprintf("%v", rate))
 }
@@ -51,8 +54,9 @@ func TestThatEmailHasCorrectReceivers(t *testing.T) {
 	setSendEmailsTestFunctionToSaveReceiverAddressStrings()
 	receiverAddresses := getReceiverAddressesForEmailReceiversTest()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations(receiverAddresses)
+	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
-	_ = SendBtcToUahRateEmails(rateService, storage, sender)
+	_ = sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.Equal(t, actualReceiverAddressStrings, receiverAddressStringsForEmailReceiversTest)
 }
@@ -61,8 +65,9 @@ func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToNotDoAnything()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
+	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
-	err := SendBtcToUahRateEmails(rateService, storage, sender)
+	err := sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.Nil(t, err)
 }
@@ -71,8 +76,9 @@ func TestThatEmailSenderHandlesApiErrors(t *testing.T) {
 	setGetRateFunctionToReturnError(ErrApiRequestUnsuccessful)
 	setSendEmailsTestFunctionToReturnError()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
+	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
-	err := SendBtcToUahRateEmails(rateService, storage, sender)
+	err := sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrApiRequestUnsuccessful, err)
@@ -82,19 +88,20 @@ func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToReturnError()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
+	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
-	err := SendBtcToUahRateEmails(rateService, storage, sender)
+	err := sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.NotNil(t, err)
 	assert.NotEqual(t, ErrApiRequestUnsuccessful, err)
 }
 
-func getRateServiceStorageAndSenderImplementations(receiverAddresses []EmailAddress) (ExchangeRateService, EmailAddressesStorage, EmailSender) {
-	rateService := exchangeRateServiceTestDouble{}
+func getRateServiceStorageAndSenderImplementations(receiverAddresses []EmailAddress) (BtcToUahRateService, EmailAddressesStorage, EmailSender) {
+	rateService := NewBtcToUahServiceImpl(&exchangeRateServiceTestDouble{})
 	storage := newInMemoryEmailAddressesStorage(receiverAddresses)
 	sender := spyEmailSender{}
 
-	return &rateService, &storage, &sender
+	return rateService, &storage, &sender
 }
 
 func setGetRateWithoutErrorFunctionToReturn(rate float64) {

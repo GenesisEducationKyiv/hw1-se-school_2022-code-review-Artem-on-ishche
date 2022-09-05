@@ -42,8 +42,9 @@ func (storage *inMemoryEmailAddressesStorage) GetEmailAddresses() []string {
 func TestAddNewEmailAddress(t *testing.T) {
 	address, _ := NewEmailAddress("my_address@domain.extension")
 	storage := newInMemoryEmailAddressesStorage([]EmailAddress{})
+	addEmailAddressImpl := NewAddEmailAddressServiceImpl(&storage)
 
-	err := AddEmailAddress(&storage, *address)
+	err := addEmailAddressImpl.AddEmailAddress(*address)
 
 	assert.Nil(t, err)
 }
@@ -52,8 +53,9 @@ func TestAddExistingEmailAddress(t *testing.T) {
 	addressString := "my_address@domain.extension"
 	address, _ := NewEmailAddress(addressString)
 	storage := newInMemoryEmailAddressesStorage([]EmailAddress{*address})
+	addEmailAddressImpl := NewAddEmailAddressServiceImpl(&storage)
 
-	err := AddEmailAddress(&storage, *address)
+	err := addEmailAddressImpl.AddEmailAddress(*address)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrEmailAddressAlreadyExists(addressString), err)
@@ -63,11 +65,12 @@ func TestSuccessiveAddingTheSameEmailAddress(t *testing.T) {
 	addressString := "my_address@domain.extension"
 	address, _ := NewEmailAddress(addressString)
 	storage := newInMemoryEmailAddressesStorage([]EmailAddress{})
+	addEmailAddressImpl := NewAddEmailAddressServiceImpl(&storage)
 
-	err := AddEmailAddress(&storage, *address)
+	err := addEmailAddressImpl.AddEmailAddress(*address)
 	assert.Nil(t, err)
 
-	err = AddEmailAddress(&storage, *address)
+	err = addEmailAddressImpl.AddEmailAddress(*address)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrEmailAddressAlreadyExists(addressString), err)
 }
@@ -79,11 +82,12 @@ func TestAddMultipleNewEmailAddresses(t *testing.T) {
 		"someone@some.mail",
 	}
 	storage := newInMemoryEmailAddressesStorage([]EmailAddress{})
+	addEmailAddressImpl := NewAddEmailAddressServiceImpl(&storage)
 
 	for _, addressString := range addressStrings {
 		address, _ := NewEmailAddress(addressString)
 
-		err := AddEmailAddress(&storage, *address)
+		err := addEmailAddressImpl.AddEmailAddress(*address)
 
 		assert.Nil(t, err)
 	}

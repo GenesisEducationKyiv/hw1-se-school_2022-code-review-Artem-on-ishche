@@ -1,4 +1,4 @@
-package data
+package implementations
 
 import (
 	"bufio"
@@ -11,7 +11,9 @@ type emailAddressesFileStorage struct {
 	filename string
 }
 
-var EmailAddressesFileStorage = emailAddressesFileStorage{filename: config.Filename}
+func GetEmailAddressesFileStorage() services.EmailAddressesStorage {
+	return &emailAddressesFileStorage{filename: config.Filename}
+}
 
 func (storage emailAddressesFileStorage) IsEmailAddressAlreadySaved(emailAddress services.EmailAddress) bool {
 	file, err := os.Open(storage.filename)

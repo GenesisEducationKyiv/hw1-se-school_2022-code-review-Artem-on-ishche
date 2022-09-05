@@ -2,16 +2,34 @@ package services
 
 import "fmt"
 
-func SendBtcToUahRateEmails(rateService ExchangeRateService, storage EmailAddressesStorage, sender EmailSender) error {
-	rate, err := GetBtcToUahRate(rateService)
+type SendBtcToUahRateEmailsService interface {
+	SendBtcToUahRateEmails() error
+}
+
+type sendBtcToUahRateEmailsServiceImpl struct {
+	rateService BtcToUahRateService
+	storage     EmailAddressesStorage
+	sender      EmailSender
+}
+
+func NewSendBtcToUahRateEmailsServiceImpl(rateService BtcToUahRateService, storage EmailAddressesStorage, sender EmailSender) SendBtcToUahRateEmailsService {
+	return &sendBtcToUahRateEmailsServiceImpl{
+		rateService: rateService,
+		storage:     storage,
+		sender:      sender,
+	}
+}
+
+func (sendRateEmailsService *sendBtcToUahRateEmailsServiceImpl) SendBtcToUahRateEmails() error {
+	rate, err := sendRateEmailsService.rateService.GetBtcToUahRate()
 	if err != nil {
 		return err
 	}
 
 	email := getEmailWithRate(rate)
-	receiverAddresses := storage.GetEmailAddresses()
+	receiverAddresses := sendRateEmailsService.storage.GetEmailAddresses()
 
-	return sender.SendEmails(email, receiverAddresses)
+	return sendRateEmailsService.sender.SendEmails(email, receiverAddresses)
 }
 
 func getEmailWithRate(rate float64) Email {

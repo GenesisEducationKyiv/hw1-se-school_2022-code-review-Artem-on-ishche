@@ -7,10 +7,9 @@ import (
 	"github.com/gorilla/mux"
 
 	"gses2.app/api/config"
-	"gses2.app/api/emails"
 	"gses2.app/api/handlers"
-	"gses2.app/api/rates"
-	"gses2.app/api/storage"
+	"gses2.app/api/implementations"
+	"gses2.app/api/services"
 )
 
 func RegisterRoutes() {
@@ -23,18 +22,30 @@ func RegisterRoutes() {
 }
 
 func rateRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	handlers.ExchangeRateServiceImpl = &rates.ExchangeRateCoinApiClient
-	registerRoute(responseWriter, request, handlers.RateRequestHandler)
+	genericExchangeRateService := implementations.GetExchangeRateCoinApiClient()
+	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
+	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(btcToUahRateService)
+
+	registerRoute(responseWriter, request, rateRequestHandler)
 }
 
 func subscribeRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	handlers.EmailAddressesStorageImpl = data.EmailAddressesFileStorage
-	registerRoute(responseWriter, request, handlers.SubscribeRequestHandler)
+	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
+	addEmailAddressService := services.NewAddEmailAddressServiceImpl(emailAddressesStorage)
+	subscribeRequestHandler := handlers.NewSubscribeRequestHandler(addEmailAddressService)
+
+	registerRoute(responseWriter, request, subscribeRequestHandler)
 }
 
 func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	handlers.EmailSenderImpl = &emails.EmailClient
-	registerRoute(responseWriter, request, handlers.SendEmailsRequestHandler)
+	genericExchangeRateService := implementations.GetExchangeRateCoinApiClient()
+	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
+	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
+	emailSender := implementations.GetEmailClient()
+	sendBtcToUahRateEmailsService := services.NewSendBtcToUahRateEmailsServiceImpl(btcToUahRateService, emailAddressesStorage, emailSender)
+	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(sendBtcToUahRateEmailsService)
+
+	registerRoute(responseWriter, request, sendEmailsRequestHandler)
 }
 
 func registerRoute(responseWriter http.ResponseWriter, request *http.Request, handler handlers.RequestHandler) {
