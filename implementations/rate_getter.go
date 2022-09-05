@@ -3,10 +3,12 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"gopkg.in/resty.v0"
+
 	"gses2.app/api/config"
 	"gses2.app/api/services"
-	"net/http"
 )
 
 type exchangeRateApiClient struct {
