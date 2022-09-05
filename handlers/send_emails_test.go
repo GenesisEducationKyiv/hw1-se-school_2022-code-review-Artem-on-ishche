@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"gses2.app/api/services"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"gses2.app/api/services"
 )
 
 type sendEmailsFunction func() error
@@ -29,7 +31,7 @@ func TestSendEmailsHandlerWhenEverythingIsOk(t *testing.T) {
 }
 
 func TestSendEmailsHandlerWhenApiRequestFailed(t *testing.T) {
-	setSendBtcToUahRateEmailsTestFunctionToReturnError(services.ErrApiRequestUnsuccessful)
+	setSendBtcToUahRateEmailsTestFunctionToReturnError(services.ErrAPIRequestUnsuccessful)
 
 	response := testSendEmailsHandler.HandleRequest(nil)
 

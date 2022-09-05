@@ -12,6 +12,7 @@ import (
 
 func TestIsEmailAddressAlreadySavedWithEmptyFile(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 
 	isSaved := GetEmailAddressesFileStorage().IsEmailAddressAlreadySaved(emailAddress)
@@ -21,7 +22,9 @@ func TestIsEmailAddressAlreadySavedWithEmptyFile(t *testing.T) {
 
 func TestIsEmailAddressAlreadySavedWhenItIsNot(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
+
 	createNonEmptyFileWithEmail("random_email@gmail.com")
 
 	isSaved := GetEmailAddressesFileStorage().IsEmailAddressAlreadySaved(emailAddress)
@@ -33,6 +36,7 @@ func TestIsEmailAddressAlreadySavedWhenItIsNot(t *testing.T) {
 
 func TestIsEmailAddressAlreadySavedWhenItIs(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 	createNonEmptyFileWithEmail(string(emailAddress))
 
@@ -45,6 +49,7 @@ func TestIsEmailAddressAlreadySavedWhenItIs(t *testing.T) {
 
 func TestAddEmailAddressWhenFileDoesNotExist(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 
 	err := GetEmailAddressesFileStorage().AddEmailAddress(emailAddress)
@@ -56,7 +61,9 @@ func TestAddEmailAddressWhenFileDoesNotExist(t *testing.T) {
 
 func TestAddEmailAddressWhenFileDoesNotContainIt(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
+
 	createNonEmptyFileWithEmail("random_email@gmail.com")
 
 	err := GetEmailAddressesFileStorage().AddEmailAddress(emailAddress)
@@ -68,7 +75,9 @@ func TestAddEmailAddressWhenFileDoesNotContainIt(t *testing.T) {
 
 func TestAddEmailAddressWhenFileContainsIt(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
+
 	createNonEmptyFileWithEmail(string(emailAddress))
 
 	err := GetEmailAddressesFileStorage().AddEmailAddress(emailAddress)
@@ -90,6 +99,7 @@ func TestGetEmailAddressesWhenFileDoesNotExist(t *testing.T) {
 
 func TestGetEmailAddressesWhenFileContainsOneAddress(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 	createNonEmptyFileWithEmail(string(emailAddress))
 
@@ -109,6 +119,7 @@ func TestGetEmailAddressesWhenFileContainsManyAddresses(t *testing.T) {
 		"address3@gmail.com",
 		"address4@gmail.com",
 	}
+
 	config.LoadEnv()
 	createNonEmptyFileWithManyEmails(providedEmailAddressStrings)
 
@@ -122,6 +133,7 @@ func TestGetEmailAddressesWhenFileContainsManyAddresses(t *testing.T) {
 
 func TestSuccessiveAddAndIsSavedCalls(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 	emailAddressesStorage := GetEmailAddressesFileStorage()
 
@@ -136,6 +148,7 @@ func TestSuccessiveAddAndIsSavedCalls(t *testing.T) {
 
 func TestSuccessiveAddAndGetCalls(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 	emailAddressesStorage := GetEmailAddressesFileStorage()
 
@@ -150,6 +163,7 @@ func TestSuccessiveAddAndGetCalls(t *testing.T) {
 
 func TestSuccessiveCallsToAllThreeEmailAddressStorageFunctions(t *testing.T) {
 	config.LoadEnv()
+
 	emailAddress := getEmailAddress()
 	emailAddressesStorage := GetEmailAddressesFileStorage()
 
@@ -171,6 +185,7 @@ func TestSuccessiveCallsToAllThreeEmailAddressStorageFunctions(t *testing.T) {
 
 func getEmailAddress() services.EmailAddress {
 	emailAddress, _ := services.NewEmailAddress("user@mail.com")
+
 	return *emailAddress
 }
 

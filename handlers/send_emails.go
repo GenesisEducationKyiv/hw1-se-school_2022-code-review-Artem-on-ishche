@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"gses2.app/api/services"
@@ -16,13 +17,11 @@ func NewSendEmailsRequestHandler(sendBtcToUahRateEmailsService services.SendBtcT
 
 func (handler sendEmailsRequestHandler) HandleRequest(request *http.Request) httpResponse {
 	err := handler.sendBtcToUahRateEmailsService.SendBtcToUahRateEmails()
-
-	switch err {
-	case nil:
-		return newHttpResponse(http.StatusOK, "Success")
-	case services.ErrApiRequestUnsuccessful:
-		return newHttpResponse(http.StatusBadGateway, "API request has not been successful")
-	default:
-		return newHttpResponse(http.StatusInternalServerError, "Some error has occurred")
+	if errors.Is(err, nil) {
+		return newHTTPResponse(http.StatusOK, "Success")
+	} else if errors.Is(err, services.ErrAPIRequestUnsuccessful) {
+		return newHTTPResponse(http.StatusBadGateway, "API request has not been successful")
+	} else {
+		return newHTTPResponse(http.StatusInternalServerError, "Some error has occurred")
 	}
 }

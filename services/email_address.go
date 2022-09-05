@@ -29,6 +29,7 @@ func validateEmailAddress(emailAddress string) error {
 }
 
 func doesEmailAddressMatchPattern(emailAddress string) bool {
-	regex := regexp.MustCompile("^[^@.][^@]*@[^@.]+\\.([^@.][^@]+[^@.]|[^@.])$")
+	regex := regexp.MustCompile(`^[^@.][^@]*@[^@.]+\.([^@.][^@]+[^@.]|[^@.])$`)
+
 	return regex.MatchString(emailAddress)
 }

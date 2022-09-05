@@ -15,10 +15,12 @@ import (
 
 func TestThatRateRouteReturnsStatusOKAndFloat(t *testing.T) {
 	config.LoadEnv()
+
 	testServer := httptest.NewServer(http.HandlerFunc(rateRoute))
 	defer testServer.Close()
 
 	response, err := http.Get(testServer.URL)
+	defer closeResponseBody(t, *response)
 	rate := getResponseBodyContent(t, *response)
 
 	assert.Nil(t, err)
@@ -28,13 +30,19 @@ func TestThatRateRouteReturnsStatusOKAndFloat(t *testing.T) {
 
 func TestThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterOneSecond(t *testing.T) {
 	config.LoadEnv()
+
 	oneSecondDuration := time.Duration(1_000_000_000)
+
 	testServer := httptest.NewServer(http.HandlerFunc(rateRoute))
 	defer testServer.Close()
 
 	response1, err1 := http.Get(testServer.URL)
+	defer closeResponseBody(t, *response1)
+
 	time.Sleep(oneSecondDuration)
+
 	response2, err2 := http.Get(testServer.URL)
+	defer closeResponseBody(t, *response2)
 
 	rate1, _ := strconv.ParseFloat(getResponseBodyContent(t, *response1), 64)
 	rate2, _ := strconv.ParseFloat(getResponseBodyContent(t, *response2), 64)
@@ -46,20 +54,28 @@ func TestThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterO
 }
 
 func getResponseBodyContent(t *testing.T, response http.Response) string {
+	t.Helper()
+
 	content, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		t.Error("Error when reading response body")
 	}
 
-	err = response.Body.Close()
-	if err != nil {
-		t.Error("Failure to close response body")
-	}
-
 	return string(content)
 }
 
+func closeResponseBody(t *testing.T, response http.Response) {
+	t.Helper()
+
+	err := response.Body.Close()
+	if err != nil {
+		t.Error("Failure to close response body")
+	}
+}
+
 func assertIsFloat(t *testing.T, str string) {
+	t.Helper()
+
 	_, err := strconv.ParseFloat(str, 64)
 	if err != nil {
 		t.Error(str, "is not float")

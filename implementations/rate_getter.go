@@ -18,24 +18,24 @@ type receivedAPIResponse struct {
 	Rate         float64 `json:"rate"`
 }
 
-type exchangeRateApiClient struct {
+type exchangeRateAPIClient struct {
 	apiRequestFormat string
 	apiKeyHeader     string
 	apiKeyValue      string
 }
 
-func GetExchangeRateCoinApiClient() services.ExchangeRateService {
-	return &exchangeRateApiClient{
+func GetExchangeRateCoinAPIClient() services.ExchangeRateService {
+	return &exchangeRateAPIClient{
 		apiRequestFormat: config.APIRequestFormat,
 		apiKeyHeader:     config.APIKeyHeader,
 		apiKeyValue:      config.APIKeyValue,
 	}
 }
 
-func (client *exchangeRateApiClient) GetExchangeRate(from, to services.Currency) (float64, error) {
+func (client *exchangeRateAPIClient) GetExchangeRate(from, to services.Currency) (float64, error) {
 	resp, err := client.makeAPIRequest(from, to)
 	if !isAPIRequestSuccessful(resp, err) {
-		return -1, services.ErrApiRequestUnsuccessful
+		return -1, services.ErrAPIRequestUnsuccessful
 	}
 
 	var result receivedAPIResponse
@@ -48,7 +48,7 @@ func (client *exchangeRateApiClient) GetExchangeRate(from, to services.Currency)
 	return result.Rate, nil
 }
 
-func (client *exchangeRateApiClient) makeAPIRequest(from, to services.Currency) (*resty.Response, error) {
+func (client *exchangeRateAPIClient) makeAPIRequest(from, to services.Currency) (*resty.Response, error) {
 	url := client.getAPIRequestForGivenCurrencies(from, to)
 
 	return resty.R().
@@ -56,7 +56,7 @@ func (client *exchangeRateApiClient) makeAPIRequest(from, to services.Currency) 
 		Get(url)
 }
 
-func (client *exchangeRateApiClient) getAPIRequestForGivenCurrencies(from, to services.Currency) string {
+func (client *exchangeRateAPIClient) getAPIRequestForGivenCurrencies(from, to services.Currency) string {
 	return fmt.Sprintf(client.apiRequestFormat, from.Name, to.Name)
 }
 

@@ -12,40 +12,47 @@ import (
 
 func TestThatGetExchangeRateReturnsErrorForUnsupportedCurrencies(t *testing.T) {
 	config.LoadEnv()
+
 	currencyFrom, currencyTo := getUnsupportedCurrencies()
 
-	_, err := GetExchangeRateCoinApiClient().GetExchangeRate(currencyFrom, currencyTo)
+	_, err := GetExchangeRateCoinAPIClient().GetExchangeRate(currencyFrom, currencyTo)
 
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, services.ErrApiRequestUnsuccessful)
+	assert.ErrorIs(t, err, services.ErrAPIRequestUnsuccessful)
 }
 
 func TestThatGetExchangeRateReturnsMinusOneForUnsupportedCurrencies(t *testing.T) {
 	config.LoadEnv()
+
 	currencyFrom, currencyTo := getUnsupportedCurrencies()
 
-	rate, _ := GetExchangeRateCoinApiClient().GetExchangeRate(currencyFrom, currencyTo)
+	rate, _ := GetExchangeRateCoinAPIClient().GetExchangeRate(currencyFrom, currencyTo)
 
 	assert.Equal(t, float64(-1), rate)
 }
 
 func TestThatGetExchangeRateReturnsNoErrorForSupportedCurrencies(t *testing.T) {
 	config.LoadEnv()
+
 	currencyFrom, currencyTo := getSupportedCurrencies()
 
-	_, err := GetExchangeRateCoinApiClient().GetExchangeRate(currencyFrom, currencyTo)
+	_, err := GetExchangeRateCoinAPIClient().GetExchangeRate(currencyFrom, currencyTo)
 
 	assert.Nil(t, err)
 }
 
 func TestThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterOneSecond(t *testing.T) {
 	config.LoadEnv()
+
 	currencyFrom, currencyTo := getSupportedCurrencies()
 	oneSecondDuration := time.Duration(1_000_000_000)
 
-	rate1, err1 := GetExchangeRateCoinApiClient().GetExchangeRate(currencyFrom, currencyTo)
+	rate1, err1 := GetExchangeRateCoinAPIClient().GetExchangeRate(currencyFrom, currencyTo)
+
 	time.Sleep(oneSecondDuration)
-	rate2, err2 := GetExchangeRateCoinApiClient().GetExchangeRate(currencyFrom, currencyTo)
+
+	rate2, err2 := GetExchangeRateCoinAPIClient().GetExchangeRate(currencyFrom, currencyTo)
+
 	delta := rate1 * 0.25 // delta is 25% of rate1
 
 	assert.Nil(t, err1)

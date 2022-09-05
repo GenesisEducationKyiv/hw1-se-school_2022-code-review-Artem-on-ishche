@@ -14,6 +14,7 @@ import (
 
 func TestSendEmailsWithNoReceivers(t *testing.T) {
 	email := services.NewEmail("title", "content")
+
 	var receiverAddresses []string
 
 	err := GetEmailClient().SendEmails(*email, receiverAddresses)
@@ -23,6 +24,7 @@ func TestSendEmailsWithNoReceivers(t *testing.T) {
 
 func TestSendEmails(t *testing.T) {
 	config.LoadEnv()
+
 	client, ctx := createClientAndContext()
 	inbox, _, _ := client.InboxControllerApi.CreateInbox(ctx, nil)
 	emailToSend := services.NewEmail("title", "content")
@@ -42,10 +44,13 @@ func createClientAndContext() (*mailslurp.APIClient, context.Context) {
 	)
 
 	mailSlurpConfig := mailslurp.NewConfiguration()
+
 	return mailslurp.NewAPIClient(mailSlurpConfig), ctx
 }
 
 func assertReceivedEmail(t *testing.T, inbox mailslurp.InboxDto, client mailslurp.APIClient, ctx context.Context) {
+	t.Helper()
+
 	waitOpts := &mailslurp.WaitForLatestEmailOpts{
 		InboxId:    optional.NewInterface(inbox.Id),
 		Timeout:    optional.NewInt64(30000),

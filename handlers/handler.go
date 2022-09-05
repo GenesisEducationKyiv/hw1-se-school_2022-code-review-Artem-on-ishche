@@ -7,7 +7,7 @@ type httpResponse struct {
 	Message    string
 }
 
-func newHttpResponse(statusCode int, responseText string) httpResponse {
+func newHTTPResponse(statusCode int, responseText string) httpResponse {
 	return httpResponse{statusCode, responseText}
 }
 

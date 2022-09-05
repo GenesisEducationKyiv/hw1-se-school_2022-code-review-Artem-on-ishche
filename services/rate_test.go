@@ -6,11 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type getRateFunction func(from, to Currency) (float64, error)
-type getRateFunctionReturnedValues struct {
-	rate float64
-	err  error
-}
+type (
+	getRateFunction               func(from, to Currency) (float64, error)
+	getRateFunctionReturnedValues struct {
+		rate float64
+		err  error
+	}
+)
+
 type getRateTest struct {
 	function       getRateFunction
 	expectedReturn getRateFunctionReturnedValues
@@ -33,9 +36,9 @@ var generalGetRateTests = []getRateTest{
 	},
 	{
 		function: func(from, to Currency) (float64, error) {
-			return -1, ErrApiRequestUnsuccessful
+			return -1, ErrAPIRequestUnsuccessful
 		},
-		expectedReturn: getRateFunctionReturnedValues{-1, ErrApiRequestUnsuccessful},
+		expectedReturn: getRateFunctionReturnedValues{-1, ErrAPIRequestUnsuccessful},
 	},
 	{
 		function: func(from, to Currency) (float64, error) {
@@ -50,12 +53,12 @@ var generalGetRateTests = []getRateTest{
 	{
 		function: func(from, to Currency) (float64, error) {
 			if from.Name == "BTC" && to.Name == "UAH" {
-				return -1, ErrApiRequestUnsuccessful
+				return -1, ErrAPIRequestUnsuccessful
 			}
 
 			return 3742.134, nil
 		},
-		expectedReturn: getRateFunctionReturnedValues{-1, ErrApiRequestUnsuccessful},
+		expectedReturn: getRateFunctionReturnedValues{-1, ErrAPIRequestUnsuccessful},
 	},
 }
 
@@ -79,10 +82,12 @@ func TestThatGetBtcToUahCallsRateServiceWithCorrectParameters(t *testing.T) {
 	btcToUahServiceImpl := NewBtcToUahServiceImpl(&spyService)
 
 	callsCount := 0
+
 	var fromCurrencyName, toCurrencyName string
 
 	getRateTestFunction = func(from, to Currency) (float64, error) {
 		callsCount++
+
 		fromCurrencyName = from.Name
 		toCurrencyName = to.Name
 

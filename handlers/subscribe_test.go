@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"gses2.app/api/services"
 	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"gses2.app/api/services"
 )
 
 type addEmailAddressFunction func(emailAddress services.EmailAddress) error
@@ -24,7 +26,7 @@ var testSubscribeRequestHandler = NewSubscribeRequestHandler(addEmailAddressServ
 func TestSubscribeRequestHandlerWhenParameterIsMissing(t *testing.T) {
 	setAddEmailAddressFunctionToReturnNoError()
 
-	response := testSubscribeRequestHandler.HandleRequest(getHttpRequestWithoutRequiredParameter())
+	response := testSubscribeRequestHandler.HandleRequest(getHTTPRequestWithoutRequiredParameter())
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 	assert.Contains(t, response.Message, "parameter")
@@ -33,7 +35,7 @@ func TestSubscribeRequestHandlerWhenParameterIsMissing(t *testing.T) {
 func TestSubscribeRequestHandlerWhenEmailParameterIsWrong(t *testing.T) {
 	setAddEmailAddressFunctionToReturnNoError()
 
-	response := testSubscribeRequestHandler.HandleRequest(getHttpRequestWithWrongEmailParameter())
+	response := testSubscribeRequestHandler.HandleRequest(getHTTPRequestWithWrongEmailParameter())
 
 	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
 	assert.NotContains(t, response.Message, "parameter")
@@ -43,7 +45,7 @@ func TestSubscribeRequestHandlerWhenEmailParameterIsWrong(t *testing.T) {
 func TestSubscribeRequestHandlerWhenEmailIsAlreadySaved(t *testing.T) {
 	setAddEmailAddressFunctionToReturnEmailAlreadyExistsError()
 
-	response := testSubscribeRequestHandler.HandleRequest(getCorrectHttpRequest())
+	response := testSubscribeRequestHandler.HandleRequest(getCorrectHTTPRequest())
 
 	assert.Equal(t, http.StatusConflict, response.StatusCode)
 }
@@ -51,7 +53,7 @@ func TestSubscribeRequestHandlerWhenEmailIsAlreadySaved(t *testing.T) {
 func TestSubscribeRequestHandlerWhenSomeErrorOccurs(t *testing.T) {
 	setAddEmailAddressFunctionToReturnUnknownError()
 
-	response := testSubscribeRequestHandler.HandleRequest(getCorrectHttpRequest())
+	response := testSubscribeRequestHandler.HandleRequest(getCorrectHTTPRequest())
 
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 }
@@ -59,7 +61,7 @@ func TestSubscribeRequestHandlerWhenSomeErrorOccurs(t *testing.T) {
 func TestSubscribeRequestHandlerWhenEverythingIsOk(t *testing.T) {
 	setAddEmailAddressFunctionToReturnNoError()
 
-	response := testSubscribeRequestHandler.HandleRequest(getCorrectHttpRequest())
+	response := testSubscribeRequestHandler.HandleRequest(getCorrectHTTPRequest())
 
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
@@ -82,20 +84,21 @@ func setAddEmailAddressFunctionToReturnUnknownError() {
 	}
 }
 
-func getHttpRequestWithoutRequiredParameter() *http.Request {
-	return getHttpRequest("/subscribe?misspelled_email=name@mail.com")
+func getHTTPRequestWithoutRequiredParameter() *http.Request {
+	return getHTTPRequest("/subscribe?misspelled_email=name@mail.com")
 }
 
-func getHttpRequestWithWrongEmailParameter() *http.Request {
-	return getHttpRequest("/subscribe?email=not.a.valid.email.com")
+func getHTTPRequestWithWrongEmailParameter() *http.Request {
+	return getHTTPRequest("/subscribe?email=not.a.valid.email.com")
 }
 
-func getCorrectHttpRequest() *http.Request {
-	return getHttpRequest("/subscribe?email=name@mail.com")
+func getCorrectHTTPRequest() *http.Request {
+	return getHTTPRequest("/subscribe?email=name@mail.com")
 }
 
-func getHttpRequest(rawURL string) *http.Request {
+func getHTTPRequest(rawURL string) *http.Request {
 	requestURL, _ := url.Parse(rawURL)
+
 	return &http.Request{
 		URL: requestURL,
 	}

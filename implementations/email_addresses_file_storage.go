@@ -2,9 +2,10 @@ package implementations
 
 import (
 	"bufio"
+	"os"
+
 	"gses2.app/api/config"
 	"gses2.app/api/services"
-	"os"
 )
 
 type emailAddressesFileStorage struct {

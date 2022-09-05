@@ -20,22 +20,21 @@ func NewSubscribeRequestHandler(addEmailAddressService services.AddEmailAddressS
 func (handler subscribeRequestHandler) HandleRequest(request *http.Request) httpResponse {
 	emailAddressString, err := getEmailParameter(request)
 	if err != nil {
-		return newHttpResponse(http.StatusBadRequest, "Required parameter 'email' is missing")
+		return newHTTPResponse(http.StatusBadRequest, "Required parameter 'email' is missing")
 	}
 
 	emailAddress, err := services.NewEmailAddress(emailAddressString)
 	if err != nil {
-		return newHttpResponse(http.StatusBadRequest, "Provided email address is wrong")
+		return newHTTPResponse(http.StatusBadRequest, "Provided email address is wrong")
 	}
 
 	err = handler.addEmailAddressService.AddEmailAddress(*emailAddress)
-
 	if err == nil {
-		return newHttpResponse(http.StatusOK, "Success")
+		return newHTTPResponse(http.StatusOK, "Success")
 	} else if isEmailAlreadySaved(err, emailAddressString) {
-		return newHttpResponse(http.StatusConflict, "This email address is already saved")
+		return newHTTPResponse(http.StatusConflict, "This email address is already saved")
 	} else {
-		return newHttpResponse(http.StatusInternalServerError, "Error when saving the email address")
+		return newHTTPResponse(http.StatusInternalServerError, "Error when saving the email address")
 	}
 }
 

@@ -33,7 +33,7 @@ func TestBtcToUahRateRequestHandlerWhenApiRequestIsSuccessful(t *testing.T) {
 }
 
 func TestBtcToUahRateRequestHandlerWhenApiRequestFailed(t *testing.T) {
-	setGetRateFunctionToReturnError(services.ErrApiRequestUnsuccessful)
+	setGetRateFunctionToReturnError(services.ErrAPIRequestUnsuccessful)
 
 	response := testBtcToUahHandler.HandleRequest(nil)
 

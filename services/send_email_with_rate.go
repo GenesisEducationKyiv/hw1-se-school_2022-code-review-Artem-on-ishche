@@ -12,7 +12,9 @@ type sendBtcToUahRateEmailsServiceImpl struct {
 	sender      EmailSender
 }
 
-func NewSendBtcToUahRateEmailsServiceImpl(rateService BtcToUahRateService, storage EmailAddressesStorage, sender EmailSender) SendBtcToUahRateEmailsService {
+func NewSendBtcToUahRateEmailsServiceImpl(
+	rateService BtcToUahRateService, storage EmailAddressesStorage, sender EmailSender,
+) SendBtcToUahRateEmailsService {
 	return &sendBtcToUahRateEmailsServiceImpl{
 		rateService: rateService,
 		storage:     storage,

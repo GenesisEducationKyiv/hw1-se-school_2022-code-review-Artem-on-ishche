@@ -1,6 +1,6 @@
 run:
   skip-dirs:
-    - emails/smtp
+    - implementations/smtp
 linters:
   enable-all: true
   disable:
@@ -22,6 +22,16 @@ linters:
     - gochecknoglobals
     - gosec
     - wrapcheck
+    - usestdlibvars
+    - testpackage
+    - paralleltest
+    - noctx
+    - ireturn
+    - goerr113
+    - exhaustivestruct
+    - exhaustruct
+    - bodyclose
+    - prealloc
 linters-settings:
   wsl:
     force-err-cuddling: true
@@ -36,3 +46,12 @@ linters-settings:
       - prefix(gses2.app/api)
       - blank
       - dot
+  lll:
+    line-length: 140
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+  revive:
+    rules:
+      - name: context-as-argument
+        disabled: true

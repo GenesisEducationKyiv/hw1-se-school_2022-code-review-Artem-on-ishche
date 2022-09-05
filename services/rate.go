@@ -2,7 +2,7 @@ package services
 
 import "errors"
 
-var ErrApiRequestUnsuccessful = errors.New("API request has been unsuccessful")
+var ErrAPIRequestUnsuccessful = errors.New("API request has been unsuccessful")
 
 type ExchangeRateService interface {
 	GetExchangeRate(from, to Currency) (float64, error)

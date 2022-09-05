@@ -13,6 +13,7 @@ import (
 
 func TestThatSubscribeRouteReturnsStatusBadRequestWhenNoEmailIsProvided(t *testing.T) {
 	config.LoadEnv()
+
 	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
 	defer testServer.Close()
 
@@ -26,6 +27,7 @@ func TestThatSubscribeRouteReturnsStatusBadRequestWhenNoEmailIsProvided(t *testi
 
 func TestThatSubscribeRouteReturnsStatusBadRequestWhenProvidedEmailIsWrong(t *testing.T) {
 	config.LoadEnv()
+
 	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
 	defer testServer.Close()
 
@@ -39,6 +41,7 @@ func TestThatSubscribeRouteReturnsStatusBadRequestWhenProvidedEmailIsWrong(t *te
 
 func TestThatSubscribeRouteReturnsStatusOKWhenProvidedEmailIsNotYetSaved(t *testing.T) {
 	config.LoadEnv()
+
 	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
 	defer testServer.Close()
 
@@ -54,13 +57,14 @@ func TestThatSubscribeRouteReturnsStatusOKWhenProvidedEmailIsNotYetSaved(t *test
 
 func TestThatSubscribeRouteReturnsStatusConflictOnConsecutiveCallsWithTheSameEmail(t *testing.T) {
 	config.LoadEnv()
+
 	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
 	defer testServer.Close()
 
 	request, _ := http.NewRequest("POST", testServer.URL+"/subscribe?email=repeating_mail@mail.com", nil)
 	client := &http.Client{}
+	_, _ = client.Do(request)
 	response, err := client.Do(request)
-	response, err = client.Do(request)
 
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusConflict, response.StatusCode)
@@ -69,6 +73,8 @@ func TestThatSubscribeRouteReturnsStatusConflictOnConsecutiveCallsWithTheSameEma
 }
 
 func removeStorageFile(t *testing.T) {
+	t.Helper()
+
 	err := os.Remove(config.Filename)
 	if err != nil {
 		t.Error("Error when removing a file")

@@ -22,7 +22,7 @@ func RegisterRoutes() {
 }
 
 func rateRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	genericExchangeRateService := implementations.GetExchangeRateCoinApiClient()
+	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
 	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
 	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(btcToUahRateService)
 
@@ -38,7 +38,7 @@ func subscribeRoute(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	genericExchangeRateService := implementations.GetExchangeRateCoinApiClient()
+	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
 	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
 	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
 	emailSender := implementations.GetEmailClient()

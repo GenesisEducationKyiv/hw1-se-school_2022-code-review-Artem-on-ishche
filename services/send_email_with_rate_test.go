@@ -17,18 +17,21 @@ func (sender *spyEmailSender) SendEmails(email Email, receiverAddresses []string
 	return sendEmailsTestFunction(email, receiverAddresses)
 }
 
-var sendEmailsCallCount = 0
-var emailBodyInTest string
-var receiverAddressStringsForEmailReceiversTest = []string{
-	"artem.mykytyshyn@gmail.com",
-	"artem.mykytyshyn@ukma.edu.ua",
-	"some.other.email.address@email.provider",
-}
+var (
+	sendEmailsCallCount                         = 0
+	emailBodyInTest                             string
+	receiverAddressStringsForEmailReceiversTest = []string{
+		"artem.mykytyshyn@gmail.com",
+		"artem.mykytyshyn@ukma.edu.ua",
+		"some.other.email.address@email.provider",
+	}
+)
 var actualReceiverAddressStrings []string
 
 func TestThatEmailSenderIsCalled(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToCountCalls()
+
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
 	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
@@ -39,8 +42,10 @@ func TestThatEmailSenderIsCalled(t *testing.T) {
 
 func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 	rate := 100.23
+
 	setGetRateWithoutErrorFunctionToReturn(rate)
 	setSendEmailsTestFunctionToSaveEmailBody()
+
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
 	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
@@ -52,6 +57,7 @@ func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 func TestThatEmailHasCorrectReceivers(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToSaveReceiverAddressStrings()
+
 	receiverAddresses := getReceiverAddressesForEmailReceiversTest()
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations(receiverAddresses)
 	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
@@ -64,6 +70,7 @@ func TestThatEmailHasCorrectReceivers(t *testing.T) {
 func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToNotDoAnything()
+
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
 	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
@@ -73,30 +80,34 @@ func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.
 }
 
 func TestThatEmailSenderHandlesApiErrors(t *testing.T) {
-	setGetRateFunctionToReturnError(ErrApiRequestUnsuccessful)
+	setGetRateFunctionToReturnError(ErrAPIRequestUnsuccessful)
 	setSendEmailsTestFunctionToReturnError()
+
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
 	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
 	err := sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrApiRequestUnsuccessful, err)
+	assert.Equal(t, ErrAPIRequestUnsuccessful, err)
 }
 
 func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
 	setSendEmailsTestFunctionToReturnError()
+
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]EmailAddress{})
 	sendEmailsServiceImpl := NewSendBtcToUahRateEmailsServiceImpl(rateService, storage, sender)
 
 	err := sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
 	assert.NotNil(t, err)
-	assert.NotEqual(t, ErrApiRequestUnsuccessful, err)
+	assert.NotEqual(t, ErrAPIRequestUnsuccessful, err)
 }
 
-func getRateServiceStorageAndSenderImplementations(receiverAddresses []EmailAddress) (BtcToUahRateService, EmailAddressesStorage, EmailSender) {
+func getRateServiceStorageAndSenderImplementations(receiverAddresses []EmailAddress) (
+	BtcToUahRateService, EmailAddressesStorage, EmailSender,
+) {
 	rateService := NewBtcToUahServiceImpl(&exchangeRateServiceTestDouble{})
 	storage := newInMemoryEmailAddressesStorage(receiverAddresses)
 	sender := spyEmailSender{}

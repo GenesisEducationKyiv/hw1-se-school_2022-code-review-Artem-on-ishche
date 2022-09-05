@@ -3,19 +3,23 @@ package routes
 import (
 	"context"
 	"fmt"
-	"github.com/antihax/optional"
-	mailslurp "github.com/mailslurp/mailslurp-client-go"
-	"github.com/stretchr/testify/assert"
-	"gses2.app/api/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/antihax/optional"
+	mailslurp "github.com/mailslurp/mailslurp-client-go"
+	"github.com/stretchr/testify/assert"
+
+	"gses2.app/api/config"
 )
 
 func TestSendEmailsRoute(t *testing.T) {
 	config.LoadEnv()
+
 	testServer := httptest.NewServer(http.HandlerFunc(sendEmailsRoute))
 	defer testServer.Close()
+
 	mailSlurpClient, ctx, inbox := createClientContextAndInbox()
 
 	saveNewInboxAddress(t, testServer, inbox.EmailAddress)
@@ -39,8 +43,10 @@ func createClientContextAndInbox() (*mailslurp.APIClient, *context.Context, *mai
 }
 
 func saveNewInboxAddress(t *testing.T, testServer *httptest.Server, emailAddress string) {
-	requestUrl := fmt.Sprintf("%v/subscribe?email=%v", testServer.URL, emailAddress)
-	request, _ := http.NewRequest("POST", requestUrl, nil)
+	t.Helper()
+
+	requestURL := fmt.Sprintf("%v/subscribe?email=%v", testServer.URL, emailAddress)
+	request, _ := http.NewRequest("POST", requestURL, nil)
 	httpClient := &http.Client{}
 	response, err := httpClient.Do(request)
 
@@ -49,8 +55,10 @@ func saveNewInboxAddress(t *testing.T, testServer *httptest.Server, emailAddress
 }
 
 func requestToSendEmail(t *testing.T, testServer *httptest.Server) {
-	requestUrl := testServer.URL + "/sendEmails"
-	request, _ := http.NewRequest("POST", requestUrl, nil)
+	t.Helper()
+
+	requestURL := testServer.URL + "/sendEmails"
+	request, _ := http.NewRequest("POST", requestURL, nil)
 	httpClient := &http.Client{}
 	response, err := httpClient.Do(request)
 
@@ -58,7 +66,11 @@ func requestToSendEmail(t *testing.T, testServer *httptest.Server) {
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func assertThatEmailHasBeenDelivered(t *testing.T, inbox mailslurp.InboxDto, client mailslurp.APIClient, ctx context.Context) {
+func assertThatEmailHasBeenDelivered(t *testing.T,
+	inbox mailslurp.InboxDto, client mailslurp.APIClient, ctx context.Context,
+) {
+	t.Helper()
+
 	waitOpts := &mailslurp.WaitForLatestEmailOpts{
 		InboxId:    optional.NewInterface(inbox.Id),
 		Timeout:    optional.NewInt64(30000),
