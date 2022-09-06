@@ -17,7 +17,8 @@ import (
 func TestSendEmailsRoute(t *testing.T) {
 	config.LoadEnv()
 
-	testServer := httptest.NewServer(http.HandlerFunc(sendEmailsRoute))
+	mux := createMux()
+	testServer := httptest.NewServer(mux)
 	defer testServer.Close()
 
 	mailSlurpClient, ctx, inbox := createClientContextAndInbox()
@@ -25,7 +26,16 @@ func TestSendEmailsRoute(t *testing.T) {
 	saveNewInboxAddress(t, testServer, inbox.EmailAddress)
 	requestToSendEmail(t, testServer)
 
-	assertThatEmailHasBeenDelivered(t, *inbox, *mailSlurpClient, *ctx)
+	assertThatEmailHasBeenDelivered(t, inbox, mailSlurpClient, ctx)
+}
+
+func createMux() *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/subscribe", subscribeRoute)
+	mux.HandleFunc("/sendEmails", sendEmailsRoute)
+
+	return mux
 }
 
 func createClientContextAndInbox() (*mailslurp.APIClient, *context.Context, *mailslurp.InboxDto) {
@@ -67,7 +77,7 @@ func requestToSendEmail(t *testing.T, testServer *httptest.Server) {
 }
 
 func assertThatEmailHasBeenDelivered(t *testing.T,
-	inbox mailslurp.InboxDto, client mailslurp.APIClient, ctx context.Context,
+	inbox *mailslurp.InboxDto, client *mailslurp.APIClient, ctx *context.Context,
 ) {
 	t.Helper()
 
@@ -76,7 +86,7 @@ func assertThatEmailHasBeenDelivered(t *testing.T,
 		Timeout:    optional.NewInt64(30000),
 		UnreadOnly: optional.NewBool(true),
 	}
-	receivedEmail, _, err := client.WaitForControllerApi.WaitForLatestEmail(ctx, waitOpts)
+	receivedEmail, _, err := client.WaitForControllerApi.WaitForLatestEmail(*ctx, waitOpts)
 
 	assert.NoError(t, err)
 	assert.Contains(t, *receivedEmail.Body, "Зараз 1 біткоїн коштує")
