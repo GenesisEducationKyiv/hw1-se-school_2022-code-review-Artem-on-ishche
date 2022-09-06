@@ -17,8 +17,7 @@ import (
 func TestSendEmailsRoute(t *testing.T) {
 	config.LoadEnv()
 
-	mux := createMux()
-	testServer := httptest.NewServer(mux)
+	testServer := httptest.NewServer(createMux())
 	defer testServer.Close()
 
 	mailSlurpClient, ctx, inbox := createClientContextAndInbox()
