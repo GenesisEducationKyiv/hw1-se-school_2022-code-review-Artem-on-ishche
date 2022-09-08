@@ -17,8 +17,7 @@ func NewSendEmailsRequestHandler(
 	emailSender services.EmailSender,
 ) RequestHandler {
 	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
-	sendBtcToUahRateEmailsService :=
-		services.NewSendBtcToUahRateEmailsServiceImpl(btcToUahRateService, emailAddressesStorage, emailSender)
+	sendBtcToUahRateEmailsService := services.NewSendBtcToUahRateEmailsServiceImpl(btcToUahRateService, emailAddressesStorage, emailSender)
 
 	return sendEmailsRequestHandler{sendBtcToUahRateEmailsService}
 }

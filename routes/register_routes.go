@@ -43,8 +43,7 @@ func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) 
 	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
 	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
 	emailSender := implementations.GetEmailClient()
-	sendEmailsRequestHandler :=
-		handlers.NewSendEmailsRequestHandler(genericExchangeRateService, emailAddressesStorage, emailSender)
+	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(genericExchangeRateService, emailAddressesStorage, emailSender)
 
 	handleRoute(responseWriter, request, sendEmailsRequestHandler)
 }
