@@ -3,16 +3,18 @@ package config
 import (
 	"log"
 	"os"
+	"regexp"
 
 	"github.com/joho/godotenv"
 )
 
 var (
-	Port          string
-	Filename      string
-	APIKeyValue   string
-	EmailAddress  string
-	EmailPassword string
+	NetworkPort          string
+	Filename             string
+	APIKeyValue          string
+	EmailAddress         string
+	EmailPassword        string
+	MailSlurpAPIKeyValue string
 )
 
 func LoadEnv() {
@@ -21,16 +23,22 @@ func LoadEnv() {
 }
 
 func loadFile() {
-	err := godotenv.Load(".env")
+	projectDirName := "btc_application"
+	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
+	currentWorkDirectory, _ := os.Getwd()
+	rootPath := projectName.Find([]byte(currentWorkDirectory))
+
+	err := godotenv.Load(string(rootPath) + `/.env`)
 	if err != nil {
-		log.Fatal("Error loading .env file.")
+		log.Fatal("Error loading .env file")
 	}
 }
 
 func loadVariables() {
-	Port = os.Getenv("NETWORK_PORT")
+	NetworkPort = os.Getenv("NETWORK_PORT")
 	Filename = os.Getenv("FILENAME")
 	APIKeyValue = os.Getenv("API_KEY")
 	EmailAddress = os.Getenv("EMAIL_ADDRESS")
 	EmailPassword = os.Getenv("EMAIL_PASSWORD")
+	MailSlurpAPIKeyValue = os.Getenv("MAILSLURP_API_KEY")
 }

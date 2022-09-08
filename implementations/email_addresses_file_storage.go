@@ -1,14 +1,23 @@
-package data
+package implementations
 
 import (
 	"bufio"
 	"os"
 
 	"gses2.app/api/config"
+	"gses2.app/api/services"
 )
 
-func IsEmailAddressSaved(emailAddress string) bool {
-	file, err := os.Open(config.Filename)
+type emailAddressesFileStorage struct {
+	filename string
+}
+
+func GetEmailAddressesFileStorage() services.EmailAddressesStorage {
+	return &emailAddressesFileStorage{filename: config.Filename}
+}
+
+func (storage emailAddressesFileStorage) IsEmailAddressAlreadySaved(emailAddress services.EmailAddress) bool {
+	file, err := os.Open(storage.filename)
 	if err != nil {
 		return false
 	}
@@ -16,7 +25,7 @@ func IsEmailAddressSaved(emailAddress string) bool {
 	defer safelyClose(file)
 	scanner := bufio.NewScanner(file)
 
-	return doesFileContainEmailAddress(scanner, emailAddress)
+	return doesFileContainEmailAddress(scanner, string(emailAddress))
 }
 
 func doesFileContainEmailAddress(scanner *bufio.Scanner, emailAddress string) bool {
@@ -29,25 +38,25 @@ func doesFileContainEmailAddress(scanner *bufio.Scanner, emailAddress string) bo
 	return false
 }
 
-func AddEmailAddress(emailAddress string) error {
+func (storage emailAddressesFileStorage) AddEmailAddress(emailAddress services.EmailAddress) error {
 	const (
 		fileModeFlags       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 		fileModePermutation = 0o644
 	)
 
-	file, err := os.OpenFile(config.Filename, fileModeFlags, fileModePermutation)
+	file, err := os.OpenFile(storage.filename, fileModeFlags, fileModePermutation)
 	if err != nil {
 		return err
 	}
 
 	defer safelyClose(file)
 
-	_, err = file.WriteString(emailAddress + "\n")
+	_, err = file.WriteString(string(emailAddress) + "\n")
 
 	return err
 }
 
-func GetEmailAddresses() []string {
+func (storage emailAddressesFileStorage) GetEmailAddresses() []string {
 	var emailAddresses []string
 
 	file, err := os.Open(config.Filename)
