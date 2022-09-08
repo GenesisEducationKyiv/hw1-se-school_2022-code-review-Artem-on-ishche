@@ -13,7 +13,9 @@ type subscribeRequestHandler struct {
 	addEmailAddressService services.AddEmailAddressService
 }
 
-func NewSubscribeRequestHandler(addEmailAddressService services.AddEmailAddressService) RequestHandler {
+func NewSubscribeRequestHandler(emailAddressesStorage services.EmailAddressesStorage) RequestHandler {
+	addEmailAddressService := services.NewAddEmailAddressServiceImpl(emailAddressesStorage)
+
 	return subscribeRequestHandler{addEmailAddressService}
 }
 

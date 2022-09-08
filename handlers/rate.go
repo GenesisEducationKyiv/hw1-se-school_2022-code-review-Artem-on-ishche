@@ -12,8 +12,10 @@ type btcToUahRateRequestHandler struct {
 	btcToUahService services.BtcToUahRateService
 }
 
-func NewBtcToUahRateRequestHandler(btcToUahService services.BtcToUahRateService) RequestHandler {
-	return btcToUahRateRequestHandler{btcToUahService}
+func NewBtcToUahRateRequestHandler(genericExchangeRateService services.ExchangeRateService) RequestHandler {
+	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
+
+	return btcToUahRateRequestHandler{btcToUahRateService}
 }
 
 func (handler btcToUahRateRequestHandler) HandleRequest(_ *http.Request) httpResponse {
