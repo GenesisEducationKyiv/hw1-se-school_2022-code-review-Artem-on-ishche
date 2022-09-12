@@ -21,7 +21,7 @@ func (service addEmailAddressServiceTestDouble) AddEmailAddress(emailAddress ser
 	return addEmailAddressTestFunction(emailAddress)
 }
 
-var testSubscribeRequestHandler = NewSubscribeRequestHandler(addEmailAddressServiceTestDouble{})
+var testSubscribeRequestHandler = subscribeRequestHandler{addEmailAddressServiceTestDouble{}}
 
 func TestSubscribeRequestHandlerWhenParameterIsMissing(t *testing.T) {
 	setAddEmailAddressFunctionToReturnNoError()

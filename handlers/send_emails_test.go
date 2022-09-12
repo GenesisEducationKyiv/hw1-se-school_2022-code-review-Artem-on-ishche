@@ -20,7 +20,7 @@ func (service sendBtcToUahRateEmailsServiceTestDouble) SendBtcToUahRateEmails() 
 	return sendBtcToUahRateEmailsTestFunction()
 }
 
-var testSendEmailsHandler = NewSendEmailsRequestHandler(sendBtcToUahRateEmailsServiceTestDouble{})
+var testSendEmailsHandler = sendEmailsRequestHandler{sendBtcToUahRateEmailsServiceTestDouble{}}
 
 func TestSendEmailsHandlerWhenEverythingIsOk(t *testing.T) {
 	setSendBtcToUahRateEmailsTestFunctionToReturnNoError()

@@ -7,5 +7,5 @@ import (
 
 func main() {
 	config.LoadEnv()
-	routes.RegisterRoutes()
+	routes.StartRouter()
 }

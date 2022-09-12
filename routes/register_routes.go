@@ -9,46 +9,46 @@ import (
 	"gses2.app/api/config"
 	"gses2.app/api/handlers"
 	"gses2.app/api/implementations"
-	"gses2.app/api/services"
 )
 
-func RegisterRoutes() {
+func StartRouter() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/rate", rateRoute).Methods("GET")
-	router.HandleFunc("/subscribe", subscribeRoute).Methods("POST")
-	router.HandleFunc("/sendEmails", sendEmailsRoute).Methods("POST")
+
+	registerRoutes(router)
 
 	log.Fatal(http.ListenAndServe(config.NetworkPort, router))
 }
 
+func registerRoutes(router *mux.Router) {
+	router.HandleFunc("/rate", rateRoute).Methods("GET")
+	router.HandleFunc("/subscribe", subscribeRoute).Methods("POST")
+	router.HandleFunc("/sendEmails", sendEmailsRoute).Methods("POST")
+}
+
 func rateRoute(responseWriter http.ResponseWriter, request *http.Request) {
 	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
-	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
-	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(btcToUahRateService)
+	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(genericExchangeRateService)
 
-	registerRoute(responseWriter, request, rateRequestHandler)
+	handleRoute(responseWriter, request, rateRequestHandler)
 }
 
 func subscribeRoute(responseWriter http.ResponseWriter, request *http.Request) {
 	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
-	addEmailAddressService := services.NewAddEmailAddressServiceImpl(emailAddressesStorage)
-	subscribeRequestHandler := handlers.NewSubscribeRequestHandler(addEmailAddressService)
+	subscribeRequestHandler := handlers.NewSubscribeRequestHandler(emailAddressesStorage)
 
-	registerRoute(responseWriter, request, subscribeRequestHandler)
+	handleRoute(responseWriter, request, subscribeRequestHandler)
 }
 
 func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) {
 	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
-	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
 	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
 	emailSender := implementations.GetEmailClient()
-	sendBtcToUahRateEmailsService := services.NewSendBtcToUahRateEmailsServiceImpl(btcToUahRateService, emailAddressesStorage, emailSender)
-	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(sendBtcToUahRateEmailsService)
+	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(genericExchangeRateService, emailAddressesStorage, emailSender)
 
-	registerRoute(responseWriter, request, sendEmailsRequestHandler)
+	handleRoute(responseWriter, request, sendEmailsRequestHandler)
 }
 
-func registerRoute(responseWriter http.ResponseWriter, request *http.Request, handler handlers.RequestHandler) {
+func handleRoute(responseWriter http.ResponseWriter, request *http.Request, handler handlers.RequestHandler) {
 	response := handler.HandleRequest(request)
 	responseSender.sendResponse(responseWriter, response.StatusCode, response.Message)
 }

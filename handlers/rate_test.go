@@ -20,7 +20,7 @@ func (service btcToUahServiceTestDouble) GetBtcToUahRate() (float64, error) {
 	return getRateTestFunction()
 }
 
-var testBtcToUahHandler = NewBtcToUahRateRequestHandler(btcToUahServiceTestDouble{})
+var testBtcToUahHandler = btcToUahRateRequestHandler{btcToUahServiceTestDouble{}}
 
 func TestBtcToUahRateRequestHandlerWhenApiRequestIsSuccessful(t *testing.T) {
 	rate := 100.001
