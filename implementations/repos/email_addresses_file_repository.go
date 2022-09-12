@@ -1,4 +1,4 @@
-package implementations
+package repos
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ type emailAddressesFileRepository struct {
 	filename string
 }
 
-func GetEmailAddressesFileStorage() services.EmailAddressesRepository {
+func GetEmailAddressesFileRepository() services.EmailAddressesRepository {
 	return &emailAddressesFileRepository{filename: config.Filename}
 }
 

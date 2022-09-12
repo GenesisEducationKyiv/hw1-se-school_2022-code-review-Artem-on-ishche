@@ -1,4 +1,4 @@
-package implementations
+package repos
 
 import (
 	"os"
@@ -15,7 +15,7 @@ func TestIsEmailAddressAlreadySavedWithEmptyFile(t *testing.T) {
 
 	emailAddress := getEmailAddress()
 
-	isSaved := GetEmailAddressesFileStorage().IsSaved(emailAddress)
+	isSaved := GetEmailAddressesFileRepository().IsSaved(emailAddress)
 
 	assert.False(t, isSaved)
 }
@@ -27,7 +27,7 @@ func TestIsEmailAddressAlreadySavedWhenItIsNot(t *testing.T) {
 
 	createNonEmptyFileWithEmail("random_email@gmail.com")
 
-	isSaved := GetEmailAddressesFileStorage().IsSaved(emailAddress)
+	isSaved := GetEmailAddressesFileRepository().IsSaved(emailAddress)
 
 	assert.False(t, isSaved)
 
@@ -40,7 +40,7 @@ func TestIsEmailAddressAlreadySavedWhenItIs(t *testing.T) {
 	emailAddress := getEmailAddress()
 	createNonEmptyFileWithEmail(string(emailAddress))
 
-	isSaved := GetEmailAddressesFileStorage().IsSaved(emailAddress)
+	isSaved := GetEmailAddressesFileRepository().IsSaved(emailAddress)
 
 	assert.True(t, isSaved)
 
@@ -52,7 +52,7 @@ func TestAddEmailAddressWhenFileDoesNotExist(t *testing.T) {
 
 	emailAddress := getEmailAddress()
 
-	err := GetEmailAddressesFileStorage().Add(emailAddress)
+	err := GetEmailAddressesFileRepository().Add(emailAddress)
 
 	assert.Nil(t, err)
 
@@ -66,7 +66,7 @@ func TestAddEmailAddressWhenFileDoesNotContainIt(t *testing.T) {
 
 	createNonEmptyFileWithEmail("random_email@gmail.com")
 
-	err := GetEmailAddressesFileStorage().Add(emailAddress)
+	err := GetEmailAddressesFileRepository().Add(emailAddress)
 
 	assert.Nil(t, err)
 
@@ -80,7 +80,7 @@ func TestAddEmailAddressWhenFileContainsIt(t *testing.T) {
 
 	createNonEmptyFileWithEmail(string(emailAddress))
 
-	err := GetEmailAddressesFileStorage().Add(emailAddress)
+	err := GetEmailAddressesFileRepository().Add(emailAddress)
 
 	assert.Nil(t, err)
 
@@ -90,7 +90,7 @@ func TestAddEmailAddressWhenFileContainsIt(t *testing.T) {
 func TestGetEmailAddressesWhenFileDoesNotExist(t *testing.T) {
 	config.LoadEnv()
 
-	emailAddressStrings := GetEmailAddressesFileStorage().GetAll()
+	emailAddressStrings := GetEmailAddressesFileRepository().GetAll()
 
 	assert.Empty(t, emailAddressStrings)
 
@@ -103,7 +103,7 @@ func TestGetEmailAddressesWhenFileContainsOneAddress(t *testing.T) {
 	emailAddress := getEmailAddress()
 	createNonEmptyFileWithEmail(string(emailAddress))
 
-	emailAddressStrings := GetEmailAddressesFileStorage().GetAll()
+	emailAddressStrings := GetEmailAddressesFileRepository().GetAll()
 
 	assert.Contains(t, emailAddressStrings, string(emailAddress))
 	assert.Equal(t, 1, len(emailAddressStrings))
@@ -123,7 +123,7 @@ func TestGetEmailAddressesWhenFileContainsManyAddresses(t *testing.T) {
 	config.LoadEnv()
 	createNonEmptyFileWithManyEmails(providedEmailAddressStrings)
 
-	actualEmailAddressStrings := GetEmailAddressesFileStorage().GetAll()
+	actualEmailAddressStrings := GetEmailAddressesFileRepository().GetAll()
 
 	assert.Equal(t, providedEmailAddressStrings, actualEmailAddressStrings)
 	assert.Contains(t, actualEmailAddressStrings, "address1@gmail.com")
@@ -135,7 +135,7 @@ func TestSuccessiveAddAndIsSavedCalls(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
-	emailAddressesStorage := GetEmailAddressesFileStorage()
+	emailAddressesStorage := GetEmailAddressesFileRepository()
 
 	err := emailAddressesStorage.Add(emailAddress)
 	contains := emailAddressesStorage.IsSaved(emailAddress)
@@ -150,7 +150,7 @@ func TestSuccessiveAddAndGetCalls(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
-	emailAddressesStorage := GetEmailAddressesFileStorage()
+	emailAddressesStorage := GetEmailAddressesFileRepository()
 
 	err := emailAddressesStorage.Add(emailAddress)
 	savedAddressStrings := emailAddressesStorage.GetAll()
@@ -165,7 +165,7 @@ func TestSuccessiveCallsToAllThreeEmailAddressStorageFunctions(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
-	emailAddressesStorage := GetEmailAddressesFileStorage()
+	emailAddressesStorage := GetEmailAddressesFileRepository()
 
 	containsBeforeAdding := emailAddressesStorage.IsSaved(emailAddress)
 	savedAddressStringsBeforeAdding := emailAddressesStorage.GetAll()

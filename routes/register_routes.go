@@ -8,7 +8,10 @@ import (
 
 	"gses2.app/api/config"
 	"gses2.app/api/handlers"
-	"gses2.app/api/implementations"
+	"gses2.app/api/implementations/email"
+	"gses2.app/api/implementations/rates"
+	"gses2.app/api/implementations/repos"
+	"gses2.app/api/services"
 )
 
 func StartRouter() {
@@ -26,23 +29,23 @@ func registerRoutes(router *mux.Router) {
 }
 
 func rateRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
+	genericExchangeRateService := getGenericExchangeRateService()
 	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(genericExchangeRateService)
 
 	handleRoute(responseWriter, request, rateRequestHandler)
 }
 
 func subscribeRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
+	emailAddressesStorage := repos.GetEmailAddressesFileRepository()
 	subscribeRequestHandler := handlers.NewSubscribeRequestHandler(emailAddressesStorage)
 
 	handleRoute(responseWriter, request, subscribeRequestHandler)
 }
 
 func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	genericExchangeRateService := implementations.GetExchangeRateCoinAPIClient()
-	emailAddressesStorage := implementations.GetEmailAddressesFileStorage()
-	emailSender := implementations.GetEmailClient()
+	genericExchangeRateService := getGenericExchangeRateService()
+	emailAddressesStorage := repos.GetEmailAddressesFileRepository()
+	emailSender := email.GetEmailClient()
 	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(genericExchangeRateService, emailAddressesStorage, emailSender)
 
 	handleRoute(responseWriter, request, sendEmailsRequestHandler)
@@ -51,4 +54,16 @@ func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) 
 func handleRoute(responseWriter http.ResponseWriter, request *http.Request, handler handlers.RequestHandler) {
 	response := handler.HandleRequest(request)
 	responseSender.sendResponse(responseWriter, response.StatusCode, response.Message)
+}
+
+func getGenericExchangeRateService() services.ExchangeRateService {
+	var rateServiceFactory services.RateServiceFactory
+
+	if config.CryptoCurrencyProvider == "coinbase" {
+		rateServiceFactory = rates.CoinAPIClientFactory{}
+	} else {
+		rateServiceFactory = rates.NomicsAPIClientFactory{}
+	}
+
+	return rateServiceFactory.CreateRateService()
 }

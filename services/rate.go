@@ -8,6 +8,10 @@ type ExchangeRateService interface {
 	GetExchangeRate(from, to Currency) (float64, error)
 }
 
+type RateServiceFactory interface {
+	CreateRateService() ExchangeRateService
+}
+
 type BtcToUahRateService interface {
 	GetBtcToUahRate() (float64, error)
 }

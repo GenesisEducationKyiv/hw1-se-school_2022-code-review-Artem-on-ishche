@@ -1,6 +1,6 @@
 run:
   skip-dirs:
-    - implementations/smtp
+    - implementations/email/smtp
 linters:
   enable-all: true
   disable:
