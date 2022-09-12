@@ -6,16 +6,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type inMemoryEmailAddressesStorage struct {
+type inMemoryEmailAddressesRepository struct {
 	emailAddresses []EmailAddress
 }
 
-func newInMemoryEmailAddressesStorage(emailAddresses []EmailAddress) inMemoryEmailAddressesStorage {
-	return inMemoryEmailAddressesStorage{emailAddresses}
+func newInMemoryEmailAddressesStorage(emailAddresses []EmailAddress) inMemoryEmailAddressesRepository {
+	return inMemoryEmailAddressesRepository{emailAddresses}
 }
 
-func (storage *inMemoryEmailAddressesStorage) IsEmailAddressAlreadySaved(emailAddress EmailAddress) bool {
-	for _, address := range storage.emailAddresses {
+func (repository *inMemoryEmailAddressesRepository) IsSaved(emailAddress EmailAddress) bool {
+	for _, address := range repository.emailAddresses {
 		if address == emailAddress {
 			return true
 		}
@@ -24,16 +24,16 @@ func (storage *inMemoryEmailAddressesStorage) IsEmailAddressAlreadySaved(emailAd
 	return false
 }
 
-func (storage *inMemoryEmailAddressesStorage) AddEmailAddress(emailAddress EmailAddress) error {
-	storage.emailAddresses = append(storage.emailAddresses, emailAddress)
+func (repository *inMemoryEmailAddressesRepository) Add(emailAddress EmailAddress) error {
+	repository.emailAddresses = append(repository.emailAddresses, emailAddress)
 
 	return nil
 }
 
-func (storage *inMemoryEmailAddressesStorage) GetEmailAddresses() []string {
+func (repository *inMemoryEmailAddressesRepository) GetAll() []string {
 	var emailAddressStrings []string
 
-	for _, address := range storage.emailAddresses {
+	for _, address := range repository.emailAddresses {
 		emailAddressStrings = append(emailAddressStrings, string(address))
 	}
 

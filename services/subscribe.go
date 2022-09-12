@@ -6,10 +6,10 @@ var ErrEmailAddressAlreadyExists = func(emailAddress string) error {
 	return fmt.Errorf("email address %v already exists", emailAddress)
 }
 
-type EmailAddressesStorage interface {
-	IsEmailAddressAlreadySaved(emailAddress EmailAddress) bool
-	AddEmailAddress(emailAddress EmailAddress) error
-	GetEmailAddresses() []string
+type EmailAddressesRepository interface {
+	IsSaved(emailAddress EmailAddress) bool
+	Add(emailAddress EmailAddress) error
+	GetAll() []string
 }
 
 type AddEmailAddressService interface {
@@ -17,17 +17,17 @@ type AddEmailAddressService interface {
 }
 
 type addEmailAddressServiceImpl struct {
-	storage EmailAddressesStorage
+	repository EmailAddressesRepository
 }
 
-func NewAddEmailAddressServiceImpl(storage EmailAddressesStorage) AddEmailAddressService {
-	return &addEmailAddressServiceImpl{storage}
+func NewAddEmailAddressServiceImpl(repository EmailAddressesRepository) AddEmailAddressService {
+	return &addEmailAddressServiceImpl{repository}
 }
 
 func (addEmailService *addEmailAddressServiceImpl) AddEmailAddress(emailAddress EmailAddress) error {
-	if addEmailService.storage.IsEmailAddressAlreadySaved(emailAddress) {
+	if addEmailService.repository.IsSaved(emailAddress) {
 		return ErrEmailAddressAlreadyExists(string(emailAddress))
 	}
 
-	return addEmailService.storage.AddEmailAddress(emailAddress)
+	return addEmailService.repository.Add(emailAddress)
 }

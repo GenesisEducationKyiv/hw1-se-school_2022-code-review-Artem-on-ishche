@@ -106,7 +106,7 @@ func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
 }
 
 func getRateServiceStorageAndSenderImplementations(receiverAddresses []EmailAddress) (
-	BtcToUahRateService, EmailAddressesStorage, EmailSender,
+	BtcToUahRateService, EmailAddressesRepository, EmailSender,
 ) {
 	rateService := NewBtcToUahServiceImpl(&exchangeRateServiceTestDouble{})
 	storage := newInMemoryEmailAddressesStorage(receiverAddresses)

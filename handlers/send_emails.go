@@ -13,11 +13,11 @@ type sendEmailsRequestHandler struct {
 
 func NewSendEmailsRequestHandler(
 	genericExchangeRateService services.ExchangeRateService,
-	emailAddressesStorage services.EmailAddressesStorage,
+	emailAddressesRepository services.EmailAddressesRepository,
 	emailSender services.EmailSender,
 ) RequestHandler {
 	btcToUahRateService := services.NewBtcToUahServiceImpl(genericExchangeRateService)
-	sendBtcToUahRateEmailsService := services.NewSendBtcToUahRateEmailsServiceImpl(btcToUahRateService, emailAddressesStorage, emailSender)
+	sendBtcToUahRateEmailsService := services.NewSendBtcToUahRateEmailsServiceImpl(btcToUahRateService, emailAddressesRepository, emailSender)
 
 	return sendEmailsRequestHandler{sendBtcToUahRateEmailsService}
 }

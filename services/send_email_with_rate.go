@@ -8,16 +8,16 @@ type SendBtcToUahRateEmailsService interface {
 
 type sendBtcToUahRateEmailsServiceImpl struct {
 	rateService BtcToUahRateService
-	storage     EmailAddressesStorage
+	repository  EmailAddressesRepository
 	sender      EmailSender
 }
 
 func NewSendBtcToUahRateEmailsServiceImpl(
-	rateService BtcToUahRateService, storage EmailAddressesStorage, sender EmailSender,
+	rateService BtcToUahRateService, repository EmailAddressesRepository, sender EmailSender,
 ) SendBtcToUahRateEmailsService {
 	return &sendBtcToUahRateEmailsServiceImpl{
 		rateService: rateService,
-		storage:     storage,
+		repository:  repository,
 		sender:      sender,
 	}
 }
@@ -29,7 +29,7 @@ func (sendRateEmailsService *sendBtcToUahRateEmailsServiceImpl) SendBtcToUahRate
 	}
 
 	email := getEmailWithRate(rate)
-	receiverAddresses := sendRateEmailsService.storage.GetEmailAddresses()
+	receiverAddresses := sendRateEmailsService.repository.GetAll()
 
 	return sendRateEmailsService.sender.SendEmails(email, receiverAddresses)
 }
