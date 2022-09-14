@@ -32,13 +32,10 @@ linters:
     - exhaustruct
     - bodyclose
     - prealloc
+    - tagliatelle
 linters-settings:
   wsl:
     force-err-cuddling: true
-  tagliatelle:
-    case:
-      rules:
-        json: snake
   gci:
     sections:
       - standard

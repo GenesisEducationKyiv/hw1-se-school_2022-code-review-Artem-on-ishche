@@ -3,6 +3,7 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
+
 	"gopkg.in/resty.v0"
 
 	"gses2.app/api/config"
