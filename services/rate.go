@@ -6,6 +6,7 @@ var ErrAPIRequestUnsuccessful = errors.New("API request has been unsuccessful")
 
 type ExchangeRateService interface {
 	GetExchangeRate(from, to Currency) (float64, error)
+	SetNext(service *ExchangeRateService)
 }
 
 type RateServiceFactory interface {

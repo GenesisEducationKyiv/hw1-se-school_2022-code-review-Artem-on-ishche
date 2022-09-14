@@ -57,13 +57,21 @@ func handleRoute(responseWriter http.ResponseWriter, request *http.Request, hand
 }
 
 func getGenericExchangeRateService() services.ExchangeRateService {
-	var rateServiceFactory services.RateServiceFactory
+	coinbaseRateService := rates.CoinAPIClientFactory{}.CreateRateService()
+	nomicsRateService := rates.NomicsAPIClientFactory{}.CreateRateService()
+	coinMarketCapRateService := rates.CoinMarketCapAPIClientFactory{}.CreateRateService()
 
-	if config.CryptoCurrencyProvider == "coinbase" {
-		rateServiceFactory = rates.CoinAPIClientFactory{}
-	} else {
-		rateServiceFactory = rates.NomicsAPIClientFactory{}
+	coinbaseRateService.SetNext(&nomicsRateService)
+	nomicsRateService.SetNext(&coinMarketCapRateService)
+
+	switch config.CryptoCurrencyProvider {
+	case "coinbase":
+		return coinbaseRateService
+	case "nomics":
+		return nomicsRateService
+	case "coin_market_cap":
+		return coinMarketCapRateService
+	default:
+		panic("Wrong crypto provider .env value")
 	}
-
-	return rateServiceFactory.CreateRateService()
 }

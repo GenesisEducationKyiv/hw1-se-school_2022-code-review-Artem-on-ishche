@@ -29,9 +29,24 @@ func (factory NomicsAPIClientFactory) CreateRateService() services.ExchangeRateS
 type exchangeRateNomicsAPIClient struct {
 	apiRequestFormat string
 	apiKeyValue      string
+
+	next *services.ExchangeRateService
+}
+
+func (client *exchangeRateNomicsAPIClient) SetNext(service *services.ExchangeRateService) {
+	client.next = service
 }
 
 func (client *exchangeRateNomicsAPIClient) GetExchangeRate(from, to services.Currency) (float64, error) {
+	rate, err := client.getExchangeRate(from, to)
+	if err != nil && client.next != nil {
+		return (*client.next).GetExchangeRate(from, to)
+	}
+
+	return rate, err
+}
+
+func (client *exchangeRateNomicsAPIClient) getExchangeRate(from, to services.Currency) (float64, error) {
 	resp, err := client.makeAPIRequest(from, to)
 	if !isAPIRequestSuccessful(resp, err) {
 		return -1, services.ErrAPIRequestUnsuccessful

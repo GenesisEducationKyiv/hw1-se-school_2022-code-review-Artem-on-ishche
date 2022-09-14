@@ -23,6 +23,8 @@ var getRateTestFunction getRateFunction
 
 type exchangeRateServiceTestDouble struct{}
 
+func (rateService *exchangeRateServiceTestDouble) SetNext(_ *ExchangeRateService) {}
+
 func (rateService *exchangeRateServiceTestDouble) GetExchangeRate(from, to Currency) (float64, error) {
 	return getRateTestFunction(from, to)
 }

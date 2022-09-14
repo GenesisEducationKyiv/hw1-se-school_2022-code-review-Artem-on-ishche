@@ -30,9 +30,24 @@ type exchangeRateCoinAPIClient struct {
 	apiRequestFormat string
 	apiKeyHeader     string
 	apiKeyValue      string
+
+	next *services.ExchangeRateService
+}
+
+func (client *exchangeRateCoinAPIClient) SetNext(service *services.ExchangeRateService) {
+	client.next = service
 }
 
 func (client *exchangeRateCoinAPIClient) GetExchangeRate(from, to services.Currency) (float64, error) {
+	rate, err := client.getExchangeRate(from, to)
+	if err != nil && client.next != nil {
+		return (*client.next).GetExchangeRate(from, to)
+	}
+
+	return rate, err
+}
+
+func (client *exchangeRateCoinAPIClient) getExchangeRate(from, to services.Currency) (float64, error) {
 	resp, err := client.makeAPIRequest(from, to)
 	if !isAPIRequestSuccessful(resp, err) {
 		return -1, services.ErrAPIRequestUnsuccessful
