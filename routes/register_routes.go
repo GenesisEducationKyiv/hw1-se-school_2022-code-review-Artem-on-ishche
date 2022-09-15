@@ -57,16 +57,16 @@ func handleRoute(responseWriter http.ResponseWriter, request *http.Request, hand
 }
 
 func getGenericExchangeRateService() services.ExchangeRateService {
-	coinbaseRateService := rates.CoinAPIClientFactory{}.CreateRateService()
+	coinRateService := rates.CoinAPIClientFactory{}.CreateRateService()
 	nomicsRateService := rates.NomicsAPIClientFactory{}.CreateRateService()
 	coinMarketCapRateService := rates.CoinMarketCapAPIClientFactory{}.CreateRateService()
 
-	coinbaseRateService.SetNext(&nomicsRateService)
+	coinRateService.SetNext(&nomicsRateService)
 	nomicsRateService.SetNext(&coinMarketCapRateService)
 
 	switch config.CryptoCurrencyProvider {
-	case "coinbase":
-		return coinbaseRateService
+	case "coin":
+		return coinRateService
 	case "nomics":
 		return nomicsRateService
 	case "coin_market_cap":

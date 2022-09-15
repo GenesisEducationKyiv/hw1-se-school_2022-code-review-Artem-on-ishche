@@ -3,9 +3,9 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
-
 	"gopkg.in/resty.v0"
+	"strconv"
+	"time"
 
 	"gses2.app/api/config"
 	"gses2.app/api/services"
@@ -13,72 +13,61 @@ import (
 
 type receivedNomicsAPIResponse struct {
 	Price          string `json:"price"`
-	PriceDate      string `json:"price_date"`
 	PriceTimestamp string `json:"price_timestamp"`
 }
 
 type NomicsAPIClientFactory struct{}
 
 func (factory NomicsAPIClientFactory) CreateRateService() services.ExchangeRateService {
-	return &exchangeRateNomicsAPIClient{
-		apiRequestFormat: "https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
-		apiKeyValue:      config.NomicsAPIKeyValue,
-	}
+	return &exchangeRateService{concreteRateClient: nomicsAPIClient{}}
 }
 
-type exchangeRateNomicsAPIClient struct {
-	apiRequestFormat string
-	apiKeyValue      string
+type nomicsAPIClient struct{}
 
-	next *services.ExchangeRateService
+func (c nomicsAPIClient) getName() string {
+	return "Nomics"
 }
 
-func (client *exchangeRateNomicsAPIClient) SetNext(service *services.ExchangeRateService) {
-	client.next = service
+func (c nomicsAPIClient) getAPIRequestUrlForGivenCurrencies(from, to services.Currency) string {
+	return fmt.Sprintf(
+		"https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
+		config.NomicsAPIKeyValue,
+		from.Name,
+		to.Name,
+	)
 }
 
-func (client *exchangeRateNomicsAPIClient) GetExchangeRate(from, to services.Currency) (float64, error) {
-	rate, err := client.getExchangeRate(from, to)
-	if err != nil && client.next != nil {
-		return (*client.next).GetExchangeRate(from, to)
-	}
-
-	return rate, err
+func (c nomicsAPIClient) getAPIRequest() *resty.Request {
+	return resty.R()
 }
 
-func (client *exchangeRateNomicsAPIClient) getExchangeRate(from, to services.Currency) (float64, error) {
-	resp, err := client.makeAPIRequest(from, to)
-	if !isAPIRequestSuccessful(resp, err) {
-		return -1, services.ErrAPIRequestUnsuccessful
-	}
-
+func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse, error) {
 	var results []receivedNomicsAPIResponse
 
-	err = json.Unmarshal(resp.Body, &results)
+	err := json.Unmarshal(responseBody, &results)
 	if err != nil {
-		return -1, err
+		return nil, services.ErrAPIResponseUnmarshallError
 	}
 
 	if len(results) == 0 {
-		return -1, services.ErrAPIRequestUnsuccessful
+		return nil, services.ErrAPIRequestUnsuccessful
 	}
 
+	result := results[0]
 	bitSize := 64
 
-	price, err := strconv.ParseFloat(results[0].Price, bitSize)
+	price, err := strconv.ParseFloat(result.Price, bitSize)
 	if err != nil {
-		return -1, err
+		return nil, services.ErrAPIRequestUnsuccessful
 	}
 
-	return price, nil
-}
+	timestamp, err := time.Parse("2006-01-02T15:04:05Z", result.PriceTimestamp)
+	if err != nil {
+		return nil, services.ErrAPIResponseUnmarshallError
+	}
 
-func (client *exchangeRateNomicsAPIClient) makeAPIRequest(from, to services.Currency) (*resty.Response, error) {
-	url := client.getAPIRequestForGivenCurrencies(from, to)
-
-	return resty.R().Get(url)
-}
-
-func (client *exchangeRateNomicsAPIClient) getAPIRequestForGivenCurrencies(from, to services.Currency) string {
-	return fmt.Sprintf(client.apiRequestFormat, client.apiKeyValue, from.Name, to.Name)
+	return &parsedResponse{
+		rate: price,
+		time: timestamp,
+	}, nil
 }
