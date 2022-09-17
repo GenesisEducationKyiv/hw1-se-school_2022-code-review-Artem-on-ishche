@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"gses2.app/api/implementations/logger"
 	"log"
 	"net/http"
 
@@ -10,6 +9,7 @@ import (
 	"gses2.app/api/config"
 	"gses2.app/api/handlers"
 	"gses2.app/api/implementations/email"
+	"gses2.app/api/implementations/logger"
 	"gses2.app/api/implementations/rates"
 	"gses2.app/api/implementations/repos"
 	"gses2.app/api/services"
@@ -71,7 +71,8 @@ func initSendEmailsRoute(
 }
 
 func getGenericExchangeRateService() services.ExchangeRateService {
-	cacherRateService := rates.CacherRateServiceFactory{}.CreateRateService()
+	fiveMinutes := 5.0
+	cacherRateService := rates.CacherRateServiceFactory{MaxTime: fiveMinutes}.CreateRateService()
 	loggerService := logger.ConsoleLogger{}
 
 	mediator := getMediator(cacherRateService, loggerService)
@@ -106,6 +107,7 @@ func getGenericExchangeRateService() services.ExchangeRateService {
 
 func getMediator(cacherRateService rates.CacherRateService, loggerService services.Logger) *rates.Mediator {
 	mediator := rates.NewMediator()
+
 	err := mediator.Attach(rates.NewRateReturnedObserver{Cacher: cacherRateService}, rates.NewRateReturnedEvent{}.GetName())
 	if err != nil {
 		return nil

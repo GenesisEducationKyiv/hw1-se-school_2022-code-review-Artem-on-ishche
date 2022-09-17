@@ -3,9 +3,10 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/resty.v0"
 	"strconv"
 	"time"
+
+	"gopkg.in/resty.v0"
 
 	"gses2.app/api/config"
 	"gses2.app/api/services"
@@ -33,7 +34,7 @@ func (c nomicsAPIClient) getName() string {
 	return "Nomics"
 }
 
-func (c nomicsAPIClient) getAPIRequestUrlForGivenCurrencies(pair services.CurrencyPair) string {
+func (c nomicsAPIClient) getAPIRequestURLForGivenCurrencies(pair services.CurrencyPair) string {
 	return fmt.Sprintf(
 		"https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
 		config.NomicsAPIKeyValue,

@@ -2,6 +2,7 @@ package rates
 
 import (
 	"fmt"
+
 	"gses2.app/api/services"
 )
 

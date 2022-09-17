@@ -1,9 +1,11 @@
 package rates
 
 import (
-	"gopkg.in/resty.v0"
-	"gses2.app/api/services"
 	"net/http"
+
+	"gopkg.in/resty.v0"
+
+	"gses2.app/api/services"
 )
 
 type RateServiceFactory interface {
@@ -58,7 +60,7 @@ func (service *exchangeRateService) getExchangeRate(pair services.CurrencyPair) 
 }
 
 func (service *exchangeRateService) makeAPIRequest(pair services.CurrencyPair) (*resty.Response, error) {
-	url := service.concreteRateClient.getAPIRequestUrlForGivenCurrencies(pair)
+	url := service.concreteRateClient.getAPIRequestURLForGivenCurrencies(pair)
 	request := service.concreteRateClient.getAPIRequest()
 
 	return request.Get(url)

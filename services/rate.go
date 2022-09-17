@@ -2,8 +2,10 @@ package services
 
 import "errors"
 
-var ErrAPIRequestUnsuccessful = errors.New("API request has been unsuccessful")
-var ErrAPIResponseUnmarshallError = errors.New("error when unmarshalling API response")
+var (
+	ErrAPIRequestUnsuccessful     = errors.New("API request has been unsuccessful")
+	ErrAPIResponseUnmarshallError = errors.New("error when unmarshalling API response")
+)
 
 type ExchangeRateService interface {
 	GetExchangeRate(pair CurrencyPair) (float64, error)

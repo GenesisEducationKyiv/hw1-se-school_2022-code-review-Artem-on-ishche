@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"gses2.app/api/handlers"
 	"net/http"
+
+	"gses2.app/api/handlers"
 )
 
 type route struct {
@@ -14,12 +15,4 @@ type route struct {
 func (r route) processRequest(responseWriter http.ResponseWriter, request *http.Request) {
 	response := (*r.handler).HandleRequest(request)
 	responseSender.sendResponse(responseWriter, response.StatusCode, response.Message)
-}
-
-func newRoute(path, method string, handler *handlers.RequestHandler) route {
-	return route{
-		path:    path,
-		method:  method,
-		handler: handler,
-	}
 }

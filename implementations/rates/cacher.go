@@ -1,15 +1,18 @@
 package rates
 
 import (
-	"gses2.app/api/services"
 	"time"
+
+	"gses2.app/api/services"
 )
 
-type CacherRateServiceFactory struct{}
+type CacherRateServiceFactory struct {
+	MaxTime float64
+}
 
 func (factory CacherRateServiceFactory) CreateRateService() CacherRateService {
 	return &inMemoryCacher{
-		maximumCacheTimeInMinutes: 5,
+		maximumCacheTimeInMinutes: factory.MaxTime,
 		cachedResponses:           make(map[services.CurrencyPair]parsedResponse),
 	}
 }

@@ -116,13 +116,13 @@ func getRateServiceStorageAndSenderImplementations(receiverAddresses []EmailAddr
 }
 
 func setGetRateWithoutErrorFunctionToReturn(rate float64) {
-	getRateTestFunction = func(from, to Currency) (float64, error) {
+	getRateTestFunction = func(pair CurrencyPair) (float64, error) {
 		return rate, nil
 	}
 }
 
 func setGetRateFunctionToReturnError(err error) {
-	getRateTestFunction = func(from, to Currency) (float64, error) {
+	getRateTestFunction = func(pair CurrencyPair) (float64, error) {
 		return -1, err
 	}
 }

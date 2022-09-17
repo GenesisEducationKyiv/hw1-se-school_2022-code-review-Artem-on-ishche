@@ -39,7 +39,7 @@ func (c coinMarketCapAPIClient) getName() string {
 	return "CoinMarketCap"
 }
 
-func (c coinMarketCapAPIClient) getAPIRequestUrlForGivenCurrencies(pair services.CurrencyPair) string {
+func (c coinMarketCapAPIClient) getAPIRequestURLForGivenCurrencies(pair services.CurrencyPair) string {
 	return fmt.Sprintf(
 		"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?convert=%v&limit=1&start=1",
 		pair.To.Name,

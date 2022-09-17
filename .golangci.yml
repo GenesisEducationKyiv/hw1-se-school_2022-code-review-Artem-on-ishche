@@ -33,6 +33,7 @@ linters:
     - bodyclose
     - prealloc
     - tagliatelle
+    - forcetypeassert
 linters-settings:
   wsl:
     force-err-cuddling: true
