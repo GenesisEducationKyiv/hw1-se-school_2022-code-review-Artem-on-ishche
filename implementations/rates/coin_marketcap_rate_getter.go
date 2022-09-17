@@ -22,10 +22,15 @@ type receivedCoinMarketCapAPIUahResponse struct {
 	} `json:"data"`
 }
 
-type CoinMarketCapAPIClientFactory struct{}
+type CoinMarketCapAPIClientFactory struct {
+	Mediator *Mediator
+}
 
-func (factory CoinMarketCapAPIClientFactory) CreateRateService() services.ExchangeRateService {
-	return &exchangeRateService{concreteRateClient: coinMarketCapAPIClient{}}
+func (factory CoinMarketCapAPIClientFactory) CreateRateService() ExchangeRateServiceChain {
+	return &exchangeRateService{
+		mediator:           factory.Mediator,
+		concreteRateClient: coinMarketCapAPIClient{},
+	}
 }
 
 type coinMarketCapAPIClient struct{}
@@ -34,10 +39,10 @@ func (c coinMarketCapAPIClient) getName() string {
 	return "CoinMarketCap"
 }
 
-func (c coinMarketCapAPIClient) getAPIRequestUrlForGivenCurrencies(from, to services.Currency) string {
+func (c coinMarketCapAPIClient) getAPIRequestUrlForGivenCurrencies(pair services.CurrencyPair) string {
 	return fmt.Sprintf(
 		"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?convert=%v&limit=1&start=1",
-		to.Name,
+		pair.To.Name,
 	)
 }
 

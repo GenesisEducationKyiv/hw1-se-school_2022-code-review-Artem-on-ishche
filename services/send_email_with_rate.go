@@ -35,7 +35,7 @@ func (sendRateEmailsService *sendBtcToUahRateEmailsServiceImpl) SendBtcToUahRate
 }
 
 func getEmailWithRate(rate float64) Email {
-	title := "BTC to UAH rate"
+	title := "BTC To UAH rate"
 	body := fmt.Sprintf("Зараз 1 біткоїн коштує %v грн\n", rate)
 
 	return *NewEmail(title, body)

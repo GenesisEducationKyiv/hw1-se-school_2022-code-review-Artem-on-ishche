@@ -33,9 +33,9 @@ func testRateAPIClient(t *testing.T, client services.ExchangeRateService) {
 func testThatGetExchangeRateReturnsErrorForUnsupportedCurrencies(t *testing.T, service services.ExchangeRateService) {
 	t.Helper()
 
-	currencyFrom, currencyTo := getUnsupportedCurrencies()
+	currencyPair := getUnsupportedCurrencies()
 
-	_, err := service.GetExchangeRate(currencyFrom, currencyTo)
+	_, err := service.GetExchangeRate(currencyPair)
 
 	assert.NotNil(t, err)
 	assert.ErrorIs(t, err, services.ErrAPIRequestUnsuccessful)
@@ -44,9 +44,9 @@ func testThatGetExchangeRateReturnsErrorForUnsupportedCurrencies(t *testing.T, s
 func testThatGetExchangeRateReturnsMinusOneForUnsupportedCurrencies(t *testing.T, service services.ExchangeRateService) {
 	t.Helper()
 
-	currencyFrom, currencyTo := getUnsupportedCurrencies()
+	currencyPair := getUnsupportedCurrencies()
 
-	rate, _ := service.GetExchangeRate(currencyFrom, currencyTo)
+	rate, _ := service.GetExchangeRate(currencyPair)
 
 	assert.Equal(t, float64(-1), rate)
 }
@@ -54,9 +54,9 @@ func testThatGetExchangeRateReturnsMinusOneForUnsupportedCurrencies(t *testing.T
 func testThatGetExchangeRateReturnsNoErrorForSupportedCurrencies(t *testing.T, service services.ExchangeRateService) {
 	t.Helper()
 
-	currencyFrom, currencyTo := getSupportedCurrencies()
+	currencyPair := getSupportedCurrencies()
 
-	_, err := service.GetExchangeRate(currencyFrom, currencyTo)
+	_, err := service.GetExchangeRate(currencyPair)
 
 	assert.Nil(t, err)
 }
@@ -66,14 +66,14 @@ func testThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterO
 ) {
 	t.Helper()
 
-	currencyFrom, currencyTo := getSupportedCurrencies()
+	currencyPair := getSupportedCurrencies()
 	deltaFraction := 0.25
 
-	rate1, err1 := service.GetExchangeRate(currencyFrom, currencyTo)
+	rate1, err1 := service.GetExchangeRate(currencyPair)
 
 	time.Sleep(oneSecondDuration)
 
-	rate2, err2 := service.GetExchangeRate(currencyFrom, currencyTo)
+	rate2, err2 := service.GetExchangeRate(currencyPair)
 
 	delta := rate1 * deltaFraction
 
@@ -82,10 +82,10 @@ func testThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterO
 	assert.InDelta(t, rate1, rate2, delta)
 }
 
-func getUnsupportedCurrencies() (services.Currency, services.Currency) {
-	return services.NewCurrency("aaaaaaaaaa"), services.NewCurrency("bbbbbbbbbb")
+func getUnsupportedCurrencies() services.CurrencyPair {
+	return services.NewCurrencyPair(services.NewCurrency("aaaaaaaaaa"), services.NewCurrency("bbbbbbbbbb"))
 }
 
-func getSupportedCurrencies() (services.Currency, services.Currency) {
-	return services.NewCurrency("btc"), services.NewCurrency("uah")
+func getSupportedCurrencies() services.CurrencyPair {
+	return services.NewCurrencyPair(services.NewCurrency("btc"), services.NewCurrency("uah"))
 }

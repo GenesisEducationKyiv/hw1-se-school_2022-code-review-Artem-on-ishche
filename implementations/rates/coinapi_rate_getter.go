@@ -14,10 +14,15 @@ type receivedCoinAPIResponse struct {
 	Rate float64 `json:"rate"`
 }
 
-type CoinAPIClientFactory struct{}
+type CoinAPIClientFactory struct {
+	Mediator *Mediator
+}
 
-func (factory CoinAPIClientFactory) CreateRateService() services.ExchangeRateService {
-	return &exchangeRateService{concreteRateClient: coinAPIClient{}}
+func (factory CoinAPIClientFactory) CreateRateService() ExchangeRateServiceChain {
+	return &exchangeRateService{
+		mediator:           factory.Mediator,
+		concreteRateClient: coinAPIClient{},
+	}
 }
 
 type coinAPIClient struct{}
@@ -26,8 +31,8 @@ func (c coinAPIClient) getName() string {
 	return "Coinbase"
 }
 
-func (c coinAPIClient) getAPIRequestUrlForGivenCurrencies(from, to services.Currency) string {
-	return fmt.Sprintf("https://rest.coinapi.io/v1/exchangerate/%v/%v", from.Name, to.Name)
+func (c coinAPIClient) getAPIRequestUrlForGivenCurrencies(pair services.CurrencyPair) string {
+	return fmt.Sprintf("https://rest.coinapi.io/v1/exchangerate/%v/%v", pair.From.Name, pair.To.Name)
 }
 
 func (c coinAPIClient) getAPIRequest() *resty.Request {

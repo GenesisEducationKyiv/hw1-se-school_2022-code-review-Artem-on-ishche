@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"gses2.app/api/implementations/logger"
 	"log"
 	"net/http"
 
@@ -16,62 +17,115 @@ import (
 
 func StartRouter() {
 	router := mux.NewRouter().StrictSlash(true)
+	routes := initRoutes()
 
-	registerRoutes(router)
+	registerRoutes(router, routes)
 
 	log.Fatal(http.ListenAndServe(config.NetworkPort, router))
 }
 
-func registerRoutes(router *mux.Router) {
-	router.HandleFunc("/rate", rateRoute).Methods("GET")
-	router.HandleFunc("/subscribe", subscribeRoute).Methods("POST")
-	router.HandleFunc("/sendEmails", sendEmailsRoute).Methods("POST")
-}
-
-func rateRoute(responseWriter http.ResponseWriter, request *http.Request) {
+func initRoutes() []route {
 	genericExchangeRateService := getGenericExchangeRateService()
-	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(genericExchangeRateService)
-
-	handleRoute(responseWriter, request, rateRequestHandler)
-}
-
-func subscribeRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	emailAddressesStorage := repos.GetEmailAddressesFileRepository()
-	subscribeRequestHandler := handlers.NewSubscribeRequestHandler(emailAddressesStorage)
-
-	handleRoute(responseWriter, request, subscribeRequestHandler)
-}
-
-func sendEmailsRoute(responseWriter http.ResponseWriter, request *http.Request) {
-	genericExchangeRateService := getGenericExchangeRateService()
-	emailAddressesStorage := repos.GetEmailAddressesFileRepository()
+	emailAddressesRepository := repos.GetEmailAddressesFileRepository()
 	emailSender := email.GetEmailClient()
-	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(genericExchangeRateService, emailAddressesStorage, emailSender)
 
-	handleRoute(responseWriter, request, sendEmailsRequestHandler)
+	rateRoute := initRateRoute(&genericExchangeRateService)
+	subscribeRoute := initSubscribeRoute(&emailAddressesRepository)
+	sendEmailsRoute := initSendEmailsRoute(&genericExchangeRateService, &emailAddressesRepository, &emailSender)
+
+	return []route{rateRoute, subscribeRoute, sendEmailsRoute}
 }
 
-func handleRoute(responseWriter http.ResponseWriter, request *http.Request, handler handlers.RequestHandler) {
-	response := handler.HandleRequest(request)
-	responseSender.sendResponse(responseWriter, response.StatusCode, response.Message)
+func initRateRoute(genericExchangeRateService *services.ExchangeRateService) route {
+	rateRequestHandler := handlers.NewBtcToUahRateRequestHandler(*genericExchangeRateService)
+
+	return route{
+		path:    "/rate",
+		method:  "GET",
+		handler: &rateRequestHandler,
+	}
+}
+
+func initSubscribeRoute(emailAddressesRepository *services.EmailAddressesRepository) route {
+	subscribeRequestHandler := handlers.NewSubscribeRequestHandler(*emailAddressesRepository)
+
+	return route{
+		path:    "/subscribe",
+		method:  "POST",
+		handler: &subscribeRequestHandler,
+	}
+}
+
+func initSendEmailsRoute(
+	genericExchangeRateService *services.ExchangeRateService,
+	emailAddressesRepository *services.EmailAddressesRepository,
+	emailSender *services.EmailSender,
+) route {
+	sendEmailsRequestHandler := handlers.NewSendEmailsRequestHandler(*genericExchangeRateService, *emailAddressesRepository, *emailSender)
+
+	return route{
+		path:    "/sendEmails",
+		method:  "POST",
+		handler: &sendEmailsRequestHandler,
+	}
 }
 
 func getGenericExchangeRateService() services.ExchangeRateService {
-	coinRateService := rates.CoinAPIClientFactory{}.CreateRateService()
-	nomicsRateService := rates.NomicsAPIClientFactory{}.CreateRateService()
-	coinMarketCapRateService := rates.CoinMarketCapAPIClientFactory{}.CreateRateService()
+	cacherRateService := rates.CacherRateServiceFactory{}.CreateRateService()
+	loggerService := logger.ConsoleLogger{}
 
-	coinRateService.SetNext(&nomicsRateService)
-	nomicsRateService.SetNext(&coinMarketCapRateService)
+	mediator := getMediator(cacherRateService, loggerService)
+
+	coinRateService := rates.CoinAPIClientFactory{Mediator: mediator}.CreateRateService()
+	nomicsRateService := rates.NomicsAPIClientFactory{Mediator: mediator}.CreateRateService()
+	coinMarketCapRateService := rates.CoinMarketCapAPIClientFactory{Mediator: mediator}.CreateRateService()
 
 	switch config.CryptoCurrencyProvider {
 	case "coin":
-		return coinRateService
+		cacherRateService.SetNext(&coinRateService)
+		coinRateService.SetNext(&nomicsRateService)
+		nomicsRateService.SetNext(&coinMarketCapRateService)
+
+		return cacherRateService
 	case "nomics":
-		return nomicsRateService
+		cacherRateService.SetNext(&nomicsRateService)
+		nomicsRateService.SetNext(&coinRateService)
+		coinRateService.SetNext(&coinMarketCapRateService)
+
+		return cacherRateService
 	case "coin_market_cap":
-		return coinMarketCapRateService
+		cacherRateService.SetNext(&coinMarketCapRateService)
+		coinMarketCapRateService.SetNext(&coinRateService)
+		coinRateService.SetNext(&nomicsRateService)
+
+		return cacherRateService
 	default:
 		panic("Wrong crypto provider .env value")
+	}
+}
+
+func getMediator(cacherRateService rates.CacherRateService, loggerService services.Logger) *rates.Mediator {
+	mediator := rates.NewMediator()
+	err := mediator.Attach(rates.NewRateReturnedObserver{Cacher: cacherRateService}, rates.NewRateReturnedEvent{}.GetName())
+	if err != nil {
+		return nil
+	}
+
+	err = mediator.Attach(rates.FailureAPIResponseReceivedObserver{Logger: loggerService}, rates.FailureAPIResponseReceivedEvent{}.GetName())
+	if err != nil {
+		return nil
+	}
+
+	err = mediator.Attach(rates.SuccessAPIResponseReceivedObserver{Logger: loggerService}, rates.SuccessAPIResponseReceivedEvent{}.GetName())
+	if err != nil {
+		return nil
+	}
+
+	return &mediator
+}
+
+func registerRoutes(router *mux.Router, routes []route) {
+	for _, route := range routes {
+		router.HandleFunc(route.path, route.processRequest).Methods(route.method)
 	}
 }

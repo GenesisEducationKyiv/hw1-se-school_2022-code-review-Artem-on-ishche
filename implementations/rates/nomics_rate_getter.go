@@ -16,10 +16,15 @@ type receivedNomicsAPIResponse struct {
 	PriceTimestamp string `json:"price_timestamp"`
 }
 
-type NomicsAPIClientFactory struct{}
+type NomicsAPIClientFactory struct {
+	Mediator *Mediator
+}
 
-func (factory NomicsAPIClientFactory) CreateRateService() services.ExchangeRateService {
-	return &exchangeRateService{concreteRateClient: nomicsAPIClient{}}
+func (factory NomicsAPIClientFactory) CreateRateService() ExchangeRateServiceChain {
+	return &exchangeRateService{
+		mediator:           factory.Mediator,
+		concreteRateClient: nomicsAPIClient{},
+	}
 }
 
 type nomicsAPIClient struct{}
@@ -28,12 +33,12 @@ func (c nomicsAPIClient) getName() string {
 	return "Nomics"
 }
 
-func (c nomicsAPIClient) getAPIRequestUrlForGivenCurrencies(from, to services.Currency) string {
+func (c nomicsAPIClient) getAPIRequestUrlForGivenCurrencies(pair services.CurrencyPair) string {
 	return fmt.Sprintf(
 		"https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
 		config.NomicsAPIKeyValue,
-		from.Name,
-		to.Name,
+		pair.From.Name,
+		pair.To.Name,
 	)
 }
 
