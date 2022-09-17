@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gses2.app/api/config"
+	"gses2.app/api/implementations/email"
+	"gses2.app/api/implementations/repos"
 )
 
 func TestSendEmailsRoute(t *testing.T) {
@@ -29,10 +31,17 @@ func TestSendEmailsRoute(t *testing.T) {
 }
 
 func createMux() *http.ServeMux {
+	genericExchangeRateService := getGenericExchangeRateService()
+	emailAddressesRepository := repos.GetEmailAddressesFileRepository()
+	emailSender := email.GetEmailClient()
+
+	subscribeRoute := initSubscribeRoute(&emailAddressesRepository)
+	sendEmailsRoute := initSendEmailsRoute(&genericExchangeRateService, &emailAddressesRepository, &emailSender)
+
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/subscribe", subscribeRoute)
-	mux.HandleFunc("/sendEmails", sendEmailsRoute)
+	mux.HandleFunc("/subscribe", subscribeRoute.processRequest)
+	mux.HandleFunc("/sendEmails", sendEmailsRoute.processRequest)
 
 	return mux
 }

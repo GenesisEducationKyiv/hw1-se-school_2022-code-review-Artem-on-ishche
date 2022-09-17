@@ -1,4 +1,4 @@
-package implementations
+package repos
 
 import (
 	"bufio"
@@ -8,16 +8,16 @@ import (
 	"gses2.app/api/services"
 )
 
-type emailAddressesFileStorage struct {
+type emailAddressesFileRepository struct {
 	filename string
 }
 
-func GetEmailAddressesFileStorage() services.EmailAddressesStorage {
-	return &emailAddressesFileStorage{filename: config.Filename}
+func GetEmailAddressesFileRepository() services.EmailAddressesRepository {
+	return &emailAddressesFileRepository{filename: config.Filename}
 }
 
-func (storage emailAddressesFileStorage) IsEmailAddressAlreadySaved(emailAddress services.EmailAddress) bool {
-	file, err := os.Open(storage.filename)
+func (repository emailAddressesFileRepository) IsSaved(emailAddress services.EmailAddress) bool {
+	file, err := os.Open(repository.filename)
 	if err != nil {
 		return false
 	}
@@ -38,13 +38,13 @@ func doesFileContainEmailAddress(scanner *bufio.Scanner, emailAddress string) bo
 	return false
 }
 
-func (storage emailAddressesFileStorage) AddEmailAddress(emailAddress services.EmailAddress) error {
+func (repository emailAddressesFileRepository) Add(emailAddress services.EmailAddress) error {
 	const (
 		fileModeFlags       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 		fileModePermutation = 0o644
 	)
 
-	file, err := os.OpenFile(storage.filename, fileModeFlags, fileModePermutation)
+	file, err := os.OpenFile(repository.filename, fileModeFlags, fileModePermutation)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (storage emailAddressesFileStorage) AddEmailAddress(emailAddress services.E
 	return err
 }
 
-func (storage emailAddressesFileStorage) GetEmailAddresses() []string {
+func (repository emailAddressesFileRepository) GetAll() []string {
 	var emailAddresses []string
 
 	file, err := os.Open(config.Filename)

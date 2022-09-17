@@ -9,12 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gses2.app/api/config"
+	"gses2.app/api/implementations/repos"
 )
 
 func TestThatSubscribeRouteReturnsStatusBadRequestWhenNoEmailIsProvided(t *testing.T) {
 	config.LoadEnv()
 
-	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
+	testServer := getTestServerWithSubscribeRoute()
 	defer testServer.Close()
 
 	request, _ := http.NewRequest("POST", testServer.URL+"/subscribe?mail=me@mail.com", nil)
@@ -28,7 +29,7 @@ func TestThatSubscribeRouteReturnsStatusBadRequestWhenNoEmailIsProvided(t *testi
 func TestThatSubscribeRouteReturnsStatusBadRequestWhenProvidedEmailIsWrong(t *testing.T) {
 	config.LoadEnv()
 
-	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
+	testServer := getTestServerWithSubscribeRoute()
 	defer testServer.Close()
 
 	request, _ := http.NewRequest("POST", testServer.URL+"/subscribe?email=wrong@mail@com", nil)
@@ -42,7 +43,7 @@ func TestThatSubscribeRouteReturnsStatusBadRequestWhenProvidedEmailIsWrong(t *te
 func TestThatSubscribeRouteReturnsStatusOKWhenProvidedEmailIsNotYetSaved(t *testing.T) {
 	config.LoadEnv()
 
-	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
+	testServer := getTestServerWithSubscribeRoute()
 	defer testServer.Close()
 
 	request, _ := http.NewRequest("POST", testServer.URL+"/subscribe?email=me@mail.com", nil)
@@ -58,7 +59,7 @@ func TestThatSubscribeRouteReturnsStatusOKWhenProvidedEmailIsNotYetSaved(t *test
 func TestThatSubscribeRouteReturnsStatusConflictOnConsecutiveCallsWithTheSameEmail(t *testing.T) {
 	config.LoadEnv()
 
-	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute))
+	testServer := getTestServerWithSubscribeRoute()
 	defer testServer.Close()
 
 	request, _ := http.NewRequest("POST", testServer.URL+"/subscribe?email=repeating_mail@mail.com", nil)
@@ -70,6 +71,14 @@ func TestThatSubscribeRouteReturnsStatusConflictOnConsecutiveCallsWithTheSameEma
 	assert.Equal(t, http.StatusConflict, response.StatusCode)
 
 	removeStorageFile(t)
+}
+
+func getTestServerWithSubscribeRoute() *httptest.Server {
+	emailAddressesRepository := repos.GetEmailAddressesFileRepository()
+	subscribeRoute := initSubscribeRoute(&emailAddressesRepository)
+	testServer := httptest.NewServer(http.HandlerFunc(subscribeRoute.processRequest))
+
+	return testServer
 }
 
 func removeStorageFile(t *testing.T) {

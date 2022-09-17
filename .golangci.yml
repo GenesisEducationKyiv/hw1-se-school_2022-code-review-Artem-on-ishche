@@ -1,6 +1,6 @@
 run:
   skip-dirs:
-    - implementations/smtp
+    - implementations/email/smtp
 linters:
   enable-all: true
   disable:
@@ -32,13 +32,11 @@ linters:
     - exhaustruct
     - bodyclose
     - prealloc
+    - tagliatelle
+    - forcetypeassert
 linters-settings:
   wsl:
     force-err-cuddling: true
-  tagliatelle:
-    case:
-      rules:
-        json: snake
   gci:
     sections:
       - standard

@@ -13,8 +13,8 @@ type subscribeRequestHandler struct {
 	addEmailAddressService services.AddEmailAddressService
 }
 
-func NewSubscribeRequestHandler(emailAddressesStorage services.EmailAddressesStorage) RequestHandler {
-	addEmailAddressService := services.NewAddEmailAddressServiceImpl(emailAddressesStorage)
+func NewSubscribeRequestHandler(emailAddressesRepository services.EmailAddressesRepository) RequestHandler {
+	addEmailAddressService := services.NewAddEmailAddressServiceImpl(emailAddressesRepository)
 
 	return subscribeRequestHandler{addEmailAddressService}
 }

@@ -1,8 +1,8 @@
-package implementations
+package email
 
 import (
 	"gses2.app/api/config"
-	"gses2.app/api/implementations/smtp"
+	smtp2 "gses2.app/api/implementations/email/smtp"
 	"gses2.app/api/services"
 )
 
@@ -17,8 +17,8 @@ func GetEmailClient() services.EmailSender {
 	return &emailClient{
 		emailAddress:  config.EmailAddress,
 		emailPassword: config.EmailPassword,
-		smtpHost:      config.SMTPHost,
-		smtpPort:      config.SMTPPort,
+		smtpHost:      "smtp.gmail.com",
+		smtpPort:      "587",
 	}
 }
 
@@ -27,8 +27,8 @@ func (emailClient *emailClient) SendEmails(email services.Email, receiverAddress
 		return nil
 	}
 
-	auth := smtp.PlainAuth("", emailClient.emailAddress, emailClient.emailPassword, emailClient.smtpHost)
+	auth := smtp2.PlainAuth("", emailClient.emailAddress, emailClient.emailPassword, emailClient.smtpHost)
 	message := []byte(email.Body)
 
-	return smtp.SendMail(emailClient.smtpHost+":"+emailClient.smtpPort, auth, emailClient.emailAddress, receiverAddresses, message)
+	return smtp2.SendMail(emailClient.smtpHost+":"+emailClient.smtpPort, auth, emailClient.emailAddress, receiverAddresses, message)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	getRateFunction               func(from, to Currency) (float64, error)
+	getRateFunction               func(pair CurrencyPair) (float64, error)
 	getRateFunctionReturnedValues struct {
 		rate float64
 		err  error
@@ -23,26 +23,28 @@ var getRateTestFunction getRateFunction
 
 type exchangeRateServiceTestDouble struct{}
 
-func (rateService *exchangeRateServiceTestDouble) GetExchangeRate(from, to Currency) (float64, error) {
-	return getRateTestFunction(from, to)
+func (rateService *exchangeRateServiceTestDouble) SetNext(_ *ExchangeRateService) {}
+
+func (rateService *exchangeRateServiceTestDouble) GetExchangeRate(pair CurrencyPair) (float64, error) {
+	return getRateTestFunction(pair)
 }
 
 var generalGetRateTests = []getRateTest{
 	{
-		function: func(from, to Currency) (float64, error) {
+		function: func(pair CurrencyPair) (float64, error) {
 			return 100, nil
 		},
 		expectedReturn: getRateFunctionReturnedValues{100, nil},
 	},
 	{
-		function: func(from, to Currency) (float64, error) {
+		function: func(pair CurrencyPair) (float64, error) {
 			return -1, ErrAPIRequestUnsuccessful
 		},
 		expectedReturn: getRateFunctionReturnedValues{-1, ErrAPIRequestUnsuccessful},
 	},
 	{
-		function: func(from, to Currency) (float64, error) {
-			if from.Name == "BTC" && to.Name == "UAH" {
+		function: func(pair CurrencyPair) (float64, error) {
+			if pair.From.Name == "BTC" && pair.To.Name == "UAH" {
 				return 900_000.001, nil
 			}
 
@@ -51,8 +53,8 @@ var generalGetRateTests = []getRateTest{
 		expectedReturn: getRateFunctionReturnedValues{900000.001, nil},
 	},
 	{
-		function: func(from, to Currency) (float64, error) {
-			if from.Name == "BTC" && to.Name == "UAH" {
+		function: func(pair CurrencyPair) (float64, error) {
+			if pair.From.Name == "BTC" && pair.To.Name == "UAH" {
 				return -1, ErrAPIRequestUnsuccessful
 			}
 
@@ -85,11 +87,11 @@ func TestThatGetBtcToUahCallsRateServiceWithCorrectParameters(t *testing.T) {
 
 	var fromCurrencyName, toCurrencyName string
 
-	getRateTestFunction = func(from, to Currency) (float64, error) {
+	getRateTestFunction = func(pair CurrencyPair) (float64, error) {
 		callsCount++
 
-		fromCurrencyName = from.Name
-		toCurrencyName = to.Name
+		fromCurrencyName = pair.From.Name
+		toCurrencyName = pair.To.Name
 
 		return 1, nil
 	}

@@ -9,12 +9,15 @@ import (
 )
 
 var (
-	NetworkPort          string
-	Filename             string
-	APIKeyValue          string
-	EmailAddress         string
-	EmailPassword        string
-	MailSlurpAPIKeyValue string
+	NetworkPort              string
+	Filename                 string
+	CoinAPIKeyValue          string
+	NomicsAPIKeyValue        string
+	CoinMarketCapAPIKeyValue string
+	EmailAddress             string
+	EmailPassword            string
+	MailSlurpAPIKeyValue     string
+	CryptoCurrencyProvider   string
 )
 
 func LoadEnv() {
@@ -37,8 +40,11 @@ func loadFile() {
 func loadVariables() {
 	NetworkPort = os.Getenv("NETWORK_PORT")
 	Filename = os.Getenv("FILENAME")
-	APIKeyValue = os.Getenv("API_KEY")
+	CoinAPIKeyValue = os.Getenv("COIN_API_KEY")
+	NomicsAPIKeyValue = os.Getenv("NOMICS_API_KEY")
+	CoinMarketCapAPIKeyValue = os.Getenv("COIN_MARKETCAP_API_KEY")
 	EmailAddress = os.Getenv("EMAIL_ADDRESS")
 	EmailPassword = os.Getenv("EMAIL_PASSWORD")
 	MailSlurpAPIKeyValue = os.Getenv("MAILSLURP_API_KEY")
+	CryptoCurrencyProvider = os.Getenv("CRYPTO_CURRENCY_PROVIDER")
 }

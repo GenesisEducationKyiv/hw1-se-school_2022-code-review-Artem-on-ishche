@@ -2,10 +2,13 @@ package services
 
 import "errors"
 
-var ErrAPIRequestUnsuccessful = errors.New("API request has been unsuccessful")
+var (
+	ErrAPIRequestUnsuccessful     = errors.New("API request has been unsuccessful")
+	ErrAPIResponseUnmarshallError = errors.New("error when unmarshalling API response")
+)
 
 type ExchangeRateService interface {
-	GetExchangeRate(from, to Currency) (float64, error)
+	GetExchangeRate(pair CurrencyPair) (float64, error)
 }
 
 type BtcToUahRateService interface {
@@ -21,5 +24,7 @@ func NewBtcToUahServiceImpl(genericRateService ExchangeRateService) BtcToUahRate
 }
 
 func (btcUahService *btcToUahRateServiceImpl) GetBtcToUahRate() (float64, error) {
-	return btcUahService.genericRateService.GetExchangeRate(NewCurrency("BTC"), NewCurrency("UAH"))
+	btcUahPair := NewCurrencyPair(NewCurrency("BTC"), NewCurrency("UAH"))
+
+	return btcUahService.genericRateService.GetExchangeRate(btcUahPair)
 }

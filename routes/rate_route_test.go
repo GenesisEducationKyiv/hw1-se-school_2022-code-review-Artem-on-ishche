@@ -16,7 +16,7 @@ import (
 func TestThatRateRouteReturnsStatusOKAndFloat(t *testing.T) {
 	config.LoadEnv()
 
-	testServer := httptest.NewServer(http.HandlerFunc(rateRoute))
+	testServer := getTestServerWithRateRoute()
 	defer testServer.Close()
 
 	response, err := http.Get(testServer.URL)
@@ -33,7 +33,7 @@ func TestThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterO
 
 	oneSecondDuration := time.Duration(1_000_000_000)
 
-	testServer := httptest.NewServer(http.HandlerFunc(rateRoute))
+	testServer := getTestServerWithRateRoute()
 	defer testServer.Close()
 
 	response1, err1 := http.Get(testServer.URL)
@@ -62,6 +62,14 @@ func getResponseBodyContent(t *testing.T, response http.Response) string {
 	}
 
 	return string(content)
+}
+
+func getTestServerWithRateRoute() *httptest.Server {
+	genericExchangeRateService := getGenericExchangeRateService()
+	rateRoute := initRateRoute(&genericExchangeRateService)
+	testServer := httptest.NewServer(http.HandlerFunc(rateRoute.processRequest))
+
+	return testServer
 }
 
 func closeResponseBody(t *testing.T, response http.Response) {

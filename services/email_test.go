@@ -15,7 +15,7 @@ var emailTests = []emailTest{
 	{"hey", "there"},
 	{"Attention!", "Thanks for your attention."},
 	{"!!!BIGGEST SALE OF THE YEAR!!!", "gotcha"},
-	{"BTC to UAH rate", "The current rate is 831311.2341 UAH for 1 BTC"},
+	{"BTC To UAH rate", "The current rate is 831311.2341 UAH for 1 BTC"},
 }
 
 func TestEmailConstructor(t *testing.T) {
