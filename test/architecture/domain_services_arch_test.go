@@ -1,8 +1,9 @@
 package architecture
 
 import (
-	"github.com/matthewmcnew/archtest"
 	"testing"
+
+	"github.com/matthewmcnew/archtest"
 )
 
 func TestDomainServicesLayerDependencies(t *testing.T) {
