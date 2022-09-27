@@ -16,7 +16,7 @@ import (
 func TestSendEmailsWithNoReceivers(t *testing.T) {
 	email := models.NewEmail("title", "content")
 
-	var receiverAddresses []string
+	var receiverAddresses []models.EmailAddress
 
 	err := emailsImpl.GetEmailClient().SendEmails(*email, receiverAddresses)
 
@@ -28,8 +28,9 @@ func TestSendEmails(t *testing.T) {
 
 	client, ctx := createClientAndContext()
 	inbox, _, _ := client.InboxControllerApi.CreateInbox(ctx, nil)
+	inboxAddress, _ := models.NewEmailAddress(inbox.EmailAddress)
 	emailToSend := models.NewEmail("title", "content")
-	receiverAddresses := []string{inbox.EmailAddress}
+	receiverAddresses := []models.EmailAddress{*inboxAddress}
 
 	err := emailsImpl.GetEmailClient().SendEmails(*emailToSend, receiverAddresses)
 

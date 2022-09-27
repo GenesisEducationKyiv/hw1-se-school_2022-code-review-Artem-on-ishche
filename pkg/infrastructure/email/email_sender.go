@@ -38,8 +38,8 @@ func (emailClient *emailClient) SendEmails(email models.EmailMessage, receiverAd
 func (emailClient *emailClient) getEmailAddressStrings(addresses []models.EmailAddress) []string {
 	addressStrings := make([]string, len(addresses))
 
-	for _, addr := range addresses {
-		addressStrings = append(addressStrings, addr.String())
+	for i, addr := range addresses {
+		addressStrings[i] = addr.String()
 	}
 
 	return addressStrings
