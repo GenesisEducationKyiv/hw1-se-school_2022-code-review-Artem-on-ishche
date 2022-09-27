@@ -18,7 +18,12 @@ func NewAddEmailAddressServiceImpl(repository services.EmailAddressesRepository)
 }
 
 func (addEmailService *addEmailAddressServiceImpl) AddEmailAddress(emailAddress models.EmailAddress) error {
-	if addEmailService.repository.IsSaved(emailAddress) {
+	isEmailSaved, err := addEmailService.repository.IsSaved(emailAddress)
+	if err != nil {
+		return err
+	}
+
+	if isEmailSaved {
 		return services.ErrEmailAddressAlreadyExists(string(emailAddress))
 	}
 

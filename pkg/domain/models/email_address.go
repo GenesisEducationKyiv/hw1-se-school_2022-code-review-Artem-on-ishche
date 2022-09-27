@@ -7,6 +7,10 @@ import (
 
 type EmailAddress string
 
+func (addr EmailAddress) String() string {
+	return string(addr)
+}
+
 var ErrEmailAddressNotValid = func(emailAddress string) error {
 	return fmt.Errorf("email address %v is not valid", emailAddress)
 }

@@ -5,5 +5,5 @@ import (
 )
 
 type EmailSender interface {
-	SendEmails(email models.Email, receiverAddresses []string) error
+	SendEmails(email models.EmailMessage, receiverAddresses []models.EmailAddress) error
 }

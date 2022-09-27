@@ -17,16 +17,16 @@ func GetEmailAddressesFileRepository() services.EmailAddressesRepository {
 	return &emailAddressesFileRepository{filename: config.Filename}
 }
 
-func (repository emailAddressesFileRepository) IsSaved(emailAddress models.EmailAddress) bool {
+func (repository emailAddressesFileRepository) IsSaved(emailAddress models.EmailAddress) (bool, error) {
 	file, err := os.Open(repository.filename)
 	if err != nil {
-		return false
+		return false, nil
 	}
 
 	defer safelyClose(file)
 	scanner := bufio.NewScanner(file)
 
-	return doesFileContainEmailAddress(scanner, string(emailAddress))
+	return doesFileContainEmailAddress(scanner, string(emailAddress)), nil
 }
 
 func doesFileContainEmailAddress(scanner *bufio.Scanner, emailAddress string) bool {
@@ -57,28 +57,38 @@ func (repository emailAddressesFileRepository) Add(emailAddress models.EmailAddr
 	return err
 }
 
-func (repository emailAddressesFileRepository) GetAll() []string {
-	var emailAddresses []string
+func (repository emailAddressesFileRepository) GetAll() ([]models.EmailAddress, error) {
+	var emailAddresses []models.EmailAddress
 
 	file, err := os.Open(config.Filename)
 	if err != nil {
-		return emailAddresses
+		return emailAddresses, nil
 	}
 
 	defer safelyClose(file)
 
-	emailAddresses = scanAddressesFromFile(file)
+	emailAddresses, err = scanAddressesFromFile(file)
+	if err != nil {
+		return emailAddresses, err
+	}
 
-	return emailAddresses
+	return emailAddresses, nil
 }
 
-func scanAddressesFromFile(file *os.File) []string {
-	var emailAddresses []string
+func scanAddressesFromFile(file *os.File) ([]models.EmailAddress, error) {
+	var emailAddresses []models.EmailAddress
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		emailAddresses = append(emailAddresses, scanner.Text())
+		text := scanner.Text()
+
+		emailAddress, err := models.NewEmailAddress(text)
+		if err != nil {
+			return emailAddresses, services.ErrEmailStorageFailure
+		}
+
+		emailAddresses = append(emailAddresses, *emailAddress)
 	}
 
-	return emailAddresses
+	return emailAddresses, nil
 }

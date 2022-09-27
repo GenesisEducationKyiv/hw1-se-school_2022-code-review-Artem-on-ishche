@@ -23,13 +23,24 @@ func GetEmailClient() services.EmailSender {
 	}
 }
 
-func (emailClient *emailClient) SendEmails(email models.Email, receiverAddresses []string) error {
+func (emailClient *emailClient) SendEmails(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
 	if len(receiverAddresses) == 0 {
 		return nil
 	}
 
 	auth := smtp.PlainAuth("", emailClient.emailAddress, emailClient.emailPassword, emailClient.smtpHost)
+	receiverAddressStrings := emailClient.getEmailAddressStrings(receiverAddresses)
 	message := []byte(email.Body)
 
-	return smtp.SendMail(emailClient.smtpHost+":"+emailClient.smtpPort, auth, emailClient.emailAddress, receiverAddresses, message)
+	return smtp.SendMail(emailClient.smtpHost+":"+emailClient.smtpPort, auth, emailClient.emailAddress, receiverAddressStrings, message)
+}
+
+func (emailClient *emailClient) getEmailAddressStrings(addresses []models.EmailAddress) []string {
+	addressStrings := make([]string, len(addresses))
+
+	for _, addr := range addresses {
+		addressStrings = append(addressStrings, addr.String())
+	}
+
+	return addressStrings
 }

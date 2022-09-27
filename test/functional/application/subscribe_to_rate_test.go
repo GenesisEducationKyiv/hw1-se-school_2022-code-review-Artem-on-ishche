@@ -18,14 +18,14 @@ func newInMemoryEmailAddressesStorage(emailAddresses []models.EmailAddress) inMe
 	return inMemoryEmailAddressesRepository{emailAddresses}
 }
 
-func (repository *inMemoryEmailAddressesRepository) IsSaved(emailAddress models.EmailAddress) bool {
+func (repository *inMemoryEmailAddressesRepository) IsSaved(emailAddress models.EmailAddress) (bool, error) {
 	for _, address := range repository.emailAddresses {
 		if address == emailAddress {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 func (repository *inMemoryEmailAddressesRepository) Add(emailAddress models.EmailAddress) error {
@@ -34,14 +34,8 @@ func (repository *inMemoryEmailAddressesRepository) Add(emailAddress models.Emai
 	return nil
 }
 
-func (repository *inMemoryEmailAddressesRepository) GetAll() []string {
-	var emailAddressStrings []string
-
-	for _, address := range repository.emailAddresses {
-		emailAddressStrings = append(emailAddressStrings, string(address))
-	}
-
-	return emailAddressStrings
+func (repository *inMemoryEmailAddressesRepository) GetAll() ([]models.EmailAddress, error) {
+	return repository.emailAddresses, nil
 }
 
 func TestAddNewEmailAddress(t *testing.T) {

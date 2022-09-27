@@ -11,13 +11,13 @@ import (
 	"gses2.app/api/pkg/domain/services"
 )
 
-type sendEmailsFunction func(email models.Email, receiverAddresses []string) error
+type sendEmailsFunction func(email models.EmailMessage, receiverAddresses []models.EmailAddress) error
 
 var sendEmailsTestFunction sendEmailsFunction
 
 type spyEmailSender struct{}
 
-func (sender *spyEmailSender) SendEmails(email models.Email, receiverAddresses []string) error {
+func (sender *spyEmailSender) SendEmails(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
 	return sendEmailsTestFunction(email, receiverAddresses)
 }
 
@@ -29,8 +29,8 @@ var (
 		"artem.mykytyshyn@ukma.edu.ua",
 		"some.other.email.address@email.provider",
 	}
+	actualReceiverAddresses []models.EmailAddress
 )
-var actualReceiverAddressStrings []string
 
 func TestThatEmailSenderIsCalled(t *testing.T) {
 	setGetRateWithoutErrorFunctionToReturn(0)
@@ -68,7 +68,7 @@ func TestThatEmailHasCorrectReceivers(t *testing.T) {
 
 	_ = sendEmailsServiceImpl.SendBtcToUahRateEmails()
 
-	assert.Equal(t, actualReceiverAddressStrings, receiverAddressStringsForEmailReceiversTest)
+	assert.Equal(t, receiverAddresses, actualReceiverAddresses)
 }
 
 func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.T) {
@@ -132,13 +132,13 @@ func setGetRateFunctionToReturnError(err error) {
 }
 
 func setSendEmailsTestFunctionToNotDoAnything() {
-	sendEmailsTestFunction = func(email models.Email, receiverAddresses []string) error {
+	sendEmailsTestFunction = func(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
 		return nil
 	}
 }
 
 func setSendEmailsTestFunctionToCountCalls() {
-	sendEmailsTestFunction = func(email models.Email, receiverAddresses []string) error {
+	sendEmailsTestFunction = func(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
 		sendEmailsCallCount++
 
 		return nil
@@ -146,7 +146,7 @@ func setSendEmailsTestFunctionToCountCalls() {
 }
 
 func setSendEmailsTestFunctionToSaveEmailBody() {
-	sendEmailsTestFunction = func(email models.Email, receiverAddresses []string) error {
+	sendEmailsTestFunction = func(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
 		emailBodyInTest = email.Body
 
 		return nil
@@ -154,15 +154,15 @@ func setSendEmailsTestFunctionToSaveEmailBody() {
 }
 
 func setSendEmailsTestFunctionToSaveReceiverAddressStrings() {
-	sendEmailsTestFunction = func(email models.Email, receiverAddresses []string) error {
-		actualReceiverAddressStrings = receiverAddresses
+	sendEmailsTestFunction = func(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
+		actualReceiverAddresses = receiverAddresses
 
 		return nil
 	}
 }
 
 func setSendEmailsTestFunctionToReturnError() {
-	sendEmailsTestFunction = func(email models.Email, receiverAddresses []string) error {
+	sendEmailsTestFunction = func(email models.EmailMessage, receiverAddresses []models.EmailAddress) error {
 		return fmt.Errorf("email has not been sent")
 	}
 }

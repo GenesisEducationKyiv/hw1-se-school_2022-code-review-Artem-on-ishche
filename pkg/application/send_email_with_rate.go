@@ -34,12 +34,16 @@ func (sendRateEmailsService *sendBtcToUahRateEmailsServiceImpl) SendBtcToUahRate
 	}
 
 	email := getEmailWithRate(rate)
-	receiverAddresses := sendRateEmailsService.repository.GetAll()
+
+	receiverAddresses, err := sendRateEmailsService.repository.GetAll()
+	if err != nil {
+		return err
+	}
 
 	return sendRateEmailsService.sender.SendEmails(email, receiverAddresses)
 }
 
-func getEmailWithRate(rate float64) models.Email {
+func getEmailWithRate(rate float64) models.EmailMessage {
 	title := "BTC To UAH rate"
 	body := fmt.Sprintf("Зараз 1 біткоїн коштує %v грн\n", rate)
 
