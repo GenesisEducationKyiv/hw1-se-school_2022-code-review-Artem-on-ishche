@@ -21,7 +21,7 @@ RUN mkdir rates
 COPY rates/*.go ./rates/
 
 RUN mkdir smtp
-COPY implementations/email/smtp/*.go ./smtp/
+COPY pkg/implementations/email/smtp/*.go ./smtp/
 
 RUN go build -o /gses2.app/api
 
