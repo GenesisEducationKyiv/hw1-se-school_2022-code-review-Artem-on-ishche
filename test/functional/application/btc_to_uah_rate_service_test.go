@@ -11,9 +11,9 @@ import (
 )
 
 type (
-	getRateFunction               func(pair models.CurrencyPair) (float64, error)
+	getRateFunction               func(pair models.CurrencyPair) (*models.ExchangeRate, error)
 	getRateFunctionReturnedValues struct {
-		rate float64
+		rate *models.ExchangeRate
 		err  error
 	}
 )
@@ -29,42 +29,54 @@ type exchangeRateServiceTestDouble struct{}
 
 func (rateService *exchangeRateServiceTestDouble) SetNext(_ *services.ExchangeRateService) {}
 
-func (rateService *exchangeRateServiceTestDouble) GetExchangeRate(pair models.CurrencyPair) (float64, error) {
+func (rateService *exchangeRateServiceTestDouble) GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
 	return getRateTestFunction(pair)
 }
 
 var generalGetRateTests = []getRateTest{
 	{
-		function: func(pair models.CurrencyPair) (float64, error) {
-			return 100, nil
+		function: func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+			return models.NewExchangeRate(pair, 100), nil
 		},
-		expectedReturn: getRateFunctionReturnedValues{100, nil},
+		expectedReturn: getRateFunctionReturnedValues{
+			models.NewExchangeRate(
+				models.NewCurrencyPair(models.NewCurrency("btc"), models.NewCurrency("uah")),
+				100,
+			),
+			nil,
+		},
 	},
 	{
-		function: func(pair models.CurrencyPair) (float64, error) {
-			return -1, services.ErrAPIRequestUnsuccessful
+		function: func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+			return nil, services.ErrAPIRequestUnsuccessful
 		},
-		expectedReturn: getRateFunctionReturnedValues{-1, services.ErrAPIRequestUnsuccessful},
+		expectedReturn: getRateFunctionReturnedValues{nil, services.ErrAPIRequestUnsuccessful},
 	},
 	{
-		function: func(pair models.CurrencyPair) (float64, error) {
-			if pair.From.Name == "BTC" && pair.To.Name == "UAH" {
-				return 900_000.001, nil
+		function: func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+			if pair.Base.Name == "BTC" && pair.Quote.Name == "UAH" {
+				return models.NewExchangeRate(pair, 900_000.001), nil
 			}
 
-			return -1, nil
+			return models.NewExchangeRate(pair, 1), nil
 		},
-		expectedReturn: getRateFunctionReturnedValues{900000.001, nil},
+		expectedReturn: getRateFunctionReturnedValues{
+			models.NewExchangeRate(
+				models.NewCurrencyPair(models.NewCurrency("btc"), models.NewCurrency("uah")),
+				900_000.001,
+			),
+			nil,
+		},
 	},
 	{
-		function: func(pair models.CurrencyPair) (float64, error) {
-			if pair.From.Name == "BTC" && pair.To.Name == "UAH" {
-				return -1, services.ErrAPIRequestUnsuccessful
+		function: func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+			if pair.Base.Name == "BTC" && pair.Quote.Name == "UAH" {
+				return nil, services.ErrAPIRequestUnsuccessful
 			}
 
-			return 3742.134, nil
+			return models.NewExchangeRate(pair, 3742.134), nil
 		},
-		expectedReturn: getRateFunctionReturnedValues{-1, services.ErrAPIRequestUnsuccessful},
+		expectedReturn: getRateFunctionReturnedValues{nil, services.ErrAPIRequestUnsuccessful},
 	},
 }
 
@@ -91,13 +103,13 @@ func TestThatGetBtcToUahCallsRateServiceWithCorrectParameters(t *testing.T) {
 
 	var fromCurrencyName, toCurrencyName string
 
-	getRateTestFunction = func(pair models.CurrencyPair) (float64, error) {
+	getRateTestFunction = func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
 		callsCount++
 
-		fromCurrencyName = pair.From.Name
-		toCurrencyName = pair.To.Name
+		fromCurrencyName = pair.Base.Name
+		toCurrencyName = pair.Quote.Name
 
-		return 1, nil
+		return models.NewExchangeRate(pair, 1), nil
 	}
 
 	_, _ = btcToUahServiceImpl.GetBtcToUahRate()

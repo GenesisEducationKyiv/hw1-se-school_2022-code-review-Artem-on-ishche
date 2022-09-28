@@ -14,7 +14,7 @@ import (
 
 type receivedCoinAPIResponse struct {
 	Time string  `json:"time"`
-	Rate float64 `json:"rate"`
+	Rate float64 `json:"price"`
 }
 
 type CoinAPIClientFactory struct {
@@ -35,7 +35,7 @@ func (c coinAPIClient) getName() string {
 }
 
 func (c coinAPIClient) getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string {
-	return fmt.Sprintf("https://rest.coinapi.io/v1/exchangerate/%v/%v", pair.From.Name, pair.To.Name)
+	return fmt.Sprintf("https://rest.coinapi.io/v1/exchangerate/%v/%v", pair.Base.Name, pair.Quote.Name)
 }
 
 func (c coinAPIClient) getAPIRequest() *resty.Request {
@@ -56,7 +56,7 @@ func (c coinAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse, 
 	}
 
 	return &parsedResponse{
-		rate: result.Rate,
-		time: timestamp,
+		price: result.Rate,
+		time:  timestamp,
 	}, nil
 }

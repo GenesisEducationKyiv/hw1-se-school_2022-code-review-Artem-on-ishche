@@ -43,7 +43,7 @@ func (c coinMarketCapAPIClient) getName() string {
 func (c coinMarketCapAPIClient) getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string {
 	return fmt.Sprintf(
 		"https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?convert=%v&limit=1&start=1",
-		pair.To.Name,
+		pair.Quote.Name,
 	)
 }
 
@@ -73,7 +73,7 @@ func (c coinMarketCapAPIClient) parseResponseBody(responseBody []byte) (*parsedR
 	}
 
 	return &parsedResponse{
-		rate: price,
-		time: timestamp,
+		price: price,
+		time:  timestamp,
 	}, nil
 }

@@ -24,7 +24,7 @@ func (handler BtcToUahRateRequestHandler) GetMethod() string {
 func (handler BtcToUahRateRequestHandler) GetResponse(_ *http.Request) Response {
 	exchangeRate, err := handler.BtcToUahService.GetBtcToUahRate()
 	if errors.Is(err, nil) {
-		return newResponse(http.StatusOK, fmt.Sprintf("%v", exchangeRate))
+		return newResponse(http.StatusOK, fmt.Sprintf("%v", exchangeRate.Price))
 	} else if errors.Is(err, services.ErrAPIRequestUnsuccessful) {
 		return newResponse(http.StatusBadGateway, "API request has not been successful")
 	} else {

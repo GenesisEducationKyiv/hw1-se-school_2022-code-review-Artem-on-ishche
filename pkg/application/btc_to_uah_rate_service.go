@@ -6,7 +6,7 @@ import (
 )
 
 type BtcToUahRateService interface {
-	GetBtcToUahRate() (float64, error)
+	GetBtcToUahRate() (*models.ExchangeRate, error)
 }
 
 type btcToUahRateServiceImpl struct {
@@ -17,7 +17,7 @@ func NewBtcToUahServiceImpl(genericRateService services.ExchangeRateService) Btc
 	return &btcToUahRateServiceImpl{genericRateService}
 }
 
-func (btcUahService *btcToUahRateServiceImpl) GetBtcToUahRate() (float64, error) {
+func (btcUahService *btcToUahRateServiceImpl) GetBtcToUahRate() (*models.ExchangeRate, error) {
 	btcUahPair := models.NewCurrencyPair(models.NewCurrency("BTC"), models.NewCurrency("UAH"))
 
 	return btcUahService.genericRateService.GetExchangeRate(btcUahPair)

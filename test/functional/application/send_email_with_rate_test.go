@@ -33,7 +33,7 @@ var (
 )
 
 func TestThatEmailSenderIsCalled(t *testing.T) {
-	setGetRateWithoutErrorFunctionToReturn(0)
+	setGetRateWithoutErrorFunctionToReturnRateWithPrice(0)
 	setSendEmailsTestFunctionToCountCalls()
 
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]models.EmailAddress{})
@@ -47,7 +47,7 @@ func TestThatEmailSenderIsCalled(t *testing.T) {
 func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 	rate := 100.23
 
-	setGetRateWithoutErrorFunctionToReturn(rate)
+	setGetRateWithoutErrorFunctionToReturnRateWithPrice(rate)
 	setSendEmailsTestFunctionToSaveEmailBody()
 
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]models.EmailAddress{})
@@ -59,7 +59,7 @@ func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 }
 
 func TestThatEmailHasCorrectReceivers(t *testing.T) {
-	setGetRateWithoutErrorFunctionToReturn(0)
+	setGetRateWithoutErrorFunctionToReturnRateWithPrice(0)
 	setSendEmailsTestFunctionToSaveReceiverAddressStrings()
 
 	receiverAddresses := getReceiverAddressesForEmailReceiversTest()
@@ -72,7 +72,7 @@ func TestThatEmailHasCorrectReceivers(t *testing.T) {
 }
 
 func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.T) {
-	setGetRateWithoutErrorFunctionToReturn(0)
+	setGetRateWithoutErrorFunctionToReturnRateWithPrice(0)
 	setSendEmailsTestFunctionToNotDoAnything()
 
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]models.EmailAddress{})
@@ -97,7 +97,7 @@ func TestThatEmailSenderHandlesApiErrors(t *testing.T) {
 }
 
 func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
-	setGetRateWithoutErrorFunctionToReturn(0)
+	setGetRateWithoutErrorFunctionToReturnRateWithPrice(0)
 	setSendEmailsTestFunctionToReturnError()
 
 	rateService, storage, sender := getRateServiceStorageAndSenderImplementations([]models.EmailAddress{})
@@ -119,15 +119,15 @@ func getRateServiceStorageAndSenderImplementations(receiverAddresses []models.Em
 	return rateService, &storage, &sender
 }
 
-func setGetRateWithoutErrorFunctionToReturn(rate float64) {
-	getRateTestFunction = func(pair models.CurrencyPair) (float64, error) {
-		return rate, nil
+func setGetRateWithoutErrorFunctionToReturnRateWithPrice(price float64) {
+	getRateTestFunction = func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+		return models.NewExchangeRate(pair, price), nil
 	}
 }
 
 func setGetRateFunctionToReturnError(err error) {
-	getRateTestFunction = func(pair models.CurrencyPair) (float64, error) {
-		return -1, err
+	getRateTestFunction = func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+		return nil, err
 	}
 }
 

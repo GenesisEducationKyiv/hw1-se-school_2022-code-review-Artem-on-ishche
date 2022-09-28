@@ -9,8 +9,8 @@ import (
 )
 
 type parsedResponse struct {
-	rate float64
-	time time.Time
+	price float64
+	time  time.Time
 }
 
 type exchangeRateAPIClient interface {

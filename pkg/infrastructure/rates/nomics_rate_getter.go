@@ -39,8 +39,8 @@ func (c nomicsAPIClient) getAPIRequestURLForGivenCurrencies(pair models.Currency
 	return fmt.Sprintf(
 		"https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
 		config.NomicsAPIKeyValue,
-		pair.From.Name,
-		pair.To.Name,
+		pair.Base.Name,
+		pair.Quote.Name,
 	)
 }
 
@@ -74,7 +74,7 @@ func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse
 	}
 
 	return &parsedResponse{
-		rate: price,
-		time: timestamp,
+		price: price,
+		time:  timestamp,
 	}, nil
 }

@@ -12,5 +12,5 @@ var (
 )
 
 type ExchangeRateService interface {
-	GetExchangeRate(pair models.CurrencyPair) (float64, error)
+	GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error)
 }

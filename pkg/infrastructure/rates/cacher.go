@@ -19,7 +19,7 @@ func (factory CacherRateServiceFactory) CreateRateService() CacherRateService {
 
 type CacherRateService interface {
 	SetNext(service *ExchangeRateServiceChain)
-	GetExchangeRate(pair models.CurrencyPair) (float64, error)
+	GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error)
 	Update(pair *models.CurrencyPair, response *parsedResponse)
 }
 
@@ -33,7 +33,7 @@ func (cacher *inMemoryCacher) SetNext(service *ExchangeRateServiceChain) {
 	cacher.next = service
 }
 
-func (cacher *inMemoryCacher) GetExchangeRate(pair models.CurrencyPair) (float64, error) {
+func (cacher *inMemoryCacher) GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
 	response, ok := cacher.cachedResponses[pair]
 	if !ok {
 		return (*cacher.next).GetExchangeRate(pair)
@@ -43,7 +43,7 @@ func (cacher *inMemoryCacher) GetExchangeRate(pair models.CurrencyPair) (float64
 		return (*cacher.next).GetExchangeRate(pair)
 	}
 
-	return response.rate, nil
+	return models.NewExchangeRate(pair, response.price), nil
 }
 
 func (cacher *inMemoryCacher) Update(pair *models.CurrencyPair, response *parsedResponse) {
