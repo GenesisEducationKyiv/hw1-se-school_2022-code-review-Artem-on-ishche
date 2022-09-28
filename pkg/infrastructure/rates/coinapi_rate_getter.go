@@ -14,7 +14,7 @@ import (
 
 type receivedCoinAPIResponse struct {
 	Time string  `json:"time"`
-	Rate float64 `json:"price"`
+	Rate float64 `json:"rate"`
 }
 
 type CoinAPIClientFactory struct {
