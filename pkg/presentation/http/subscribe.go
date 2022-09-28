@@ -1,15 +1,18 @@
 package http
 
 import (
-	"errors"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
 
-var errMissingParameter = errors.New("required parameter is missing")
+type subscribeRequestParameters struct {
+	EmailAddrString string `form:"email" binding:"required"`
+}
 
 type SubscribeRequestHandler struct {
 	AddEmailAddressService application.AddEmailAddressService
@@ -23,39 +26,31 @@ func (handler SubscribeRequestHandler) GetMethod() string {
 	return "POST"
 }
 
-func (handler SubscribeRequestHandler) GetResponse(request *http.Request) Response {
-	emailAddressString, err := getEmailParameter(request)
+func (handler SubscribeRequestHandler) HandleRequest(c *gin.Context) {
+	var params subscribeRequestParameters
+
+	err := c.ShouldBind(&params)
 	if err != nil {
-		return newResponse(http.StatusBadRequest, "Required parameter 'email' is missing")
+		c.JSON(http.StatusBadRequest, "Required parameter 'email' is missing")
+
+		return
 	}
 
-	emailAddress, err := models.NewEmailAddress(emailAddressString)
+	emailAddress, err := models.NewEmailAddress(params.EmailAddrString)
 	if err != nil {
-		return newResponse(http.StatusBadRequest, "Provided email address is wrong")
+		c.JSON(http.StatusBadRequest, "Provided email address is wrong")
+
+		return
 	}
 
 	err = handler.AddEmailAddressService.AddEmailAddress(*emailAddress)
 	if err == nil {
-		return newResponse(http.StatusOK, "Success")
-	} else if isEmailAlreadySaved(err, emailAddressString) {
-		return newResponse(http.StatusConflict, "This email address is already saved")
+		c.JSON(http.StatusOK, "Success")
+	} else if isEmailAlreadySaved(err, emailAddress.String()) {
+		c.JSON(http.StatusConflict, "This email address is already saved")
 	} else {
-		return newResponse(http.StatusInternalServerError, "Error when saving the email address")
+		c.JSON(http.StatusInternalServerError, "Error when saving the email address")
 	}
-}
-
-func getEmailParameter(request *http.Request) (string, error) {
-	emailParams, ok := request.URL.Query()["email"]
-	if !hasRequiredParameter(emailParams, ok) {
-		return "", errMissingParameter
-	}
-
-	// save only the first email if more are provided
-	return emailParams[0], nil
-}
-
-func hasRequiredParameter(emailParams []string, ok bool) bool {
-	return ok && len(emailParams[0]) > 0
 }
 
 func isEmailAlreadySaved(err error, emailAddressString string) bool {

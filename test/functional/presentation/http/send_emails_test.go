@@ -2,51 +2,35 @@ package http
 
 import (
 	"fmt"
-	"net/http"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
-
 	"gses2.app/api/pkg/domain/services"
-	httpPresentation "gses2.app/api/pkg/presentation/http"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
-
-type sendEmailsFunction func() error
-
-var sendBtcToUahRateEmailsTestFunction sendEmailsFunction
-
-type sendBtcToUahRateEmailsServiceTestDouble struct{}
-
-func (service sendBtcToUahRateEmailsServiceTestDouble) SendBtcToUahRateEmails() error {
-	return sendBtcToUahRateEmailsTestFunction()
-}
-
-var testSendEmailsHandler = httpPresentation.SendEmailsRequestHandler{
-	SendBtcToUahRateEmailsService: sendBtcToUahRateEmailsServiceTestDouble{},
-}
 
 func TestSendEmailsHandlerWhenEverythingIsOk(t *testing.T) {
 	setSendBtcToUahRateEmailsTestFunctionToReturnNoError()
 
-	response := testSendEmailsHandler.GetResponse(nil)
+	recorder := makeSendEmailsRequest()
 
-	assert.Equal(t, http.StatusOK, response.StatusCode)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 }
 
 func TestSendEmailsHandlerWhenApiRequestFailed(t *testing.T) {
 	setSendBtcToUahRateEmailsTestFunctionToReturnError(services.ErrAPIRequestUnsuccessful)
 
-	response := testSendEmailsHandler.GetResponse(nil)
+	recorder := makeSendEmailsRequest()
 
-	assert.Equal(t, http.StatusBadGateway, response.StatusCode)
+	assert.Equal(t, http.StatusBadGateway, recorder.Code)
 }
 
 func TestSendEmailsHandlerWhenSomethingElseFailed(t *testing.T) {
 	setSendBtcToUahRateEmailsTestFunctionToReturnError(fmt.Errorf("some unknown error"))
 
-	response := testSendEmailsHandler.GetResponse(nil)
+	recorder := makeSendEmailsRequest()
 
-	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 }
 
 func setSendBtcToUahRateEmailsTestFunctionToReturnNoError() {
@@ -59,4 +43,12 @@ func setSendBtcToUahRateEmailsTestFunctionToReturnError(err error) {
 	sendBtcToUahRateEmailsTestFunction = func() error {
 		return err
 	}
+}
+
+func makeSendEmailsRequest() *httptest.ResponseRecorder {
+	router, recorder := getRouterAndRecorder()
+	request, _ := http.NewRequest("POST", "/sendEmails", nil)
+	router.ServeHTTP(recorder, request)
+
+	return recorder
 }

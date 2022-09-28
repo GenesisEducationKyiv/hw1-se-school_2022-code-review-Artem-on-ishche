@@ -1,29 +1,26 @@
 package http
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/gorilla/mux"
-
+	"github.com/gin-gonic/gin"
 	"gses2.app/api/pkg/application"
-	"gses2.app/api/pkg/config"
 )
 
-func StartRouter(
+func SetupRouter(
 	btcToUahService application.BtcToUahRateService,
 	addEmailAddressService application.AddEmailAddressService,
 	sendBtcToUahRateEmailsService application.SendBtcToUahRateEmailsService,
-) {
-	router := mux.NewRouter().StrictSlash(true)
-	handlers := InitHandlers(btcToUahService, addEmailAddressService, sendBtcToUahRateEmailsService)
+) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
+
+	router := gin.Default()
+	handlers := initHandlers(btcToUahService, addEmailAddressService, sendBtcToUahRateEmailsService)
 
 	registerHandlers(router, handlers)
 
-	log.Fatal(http.ListenAndServe(config.NetworkPort, router))
+	return router
 }
 
-func InitHandlers(
+func initHandlers(
 	btcToUahService application.BtcToUahRateService,
 	addEmailAddressService application.AddEmailAddressService,
 	sendBtcToUahRateEmailsService application.SendBtcToUahRateEmailsService,
@@ -35,8 +32,8 @@ func InitHandlers(
 	return []RequestHandler{rateHandler, subscribeHandler, sendEmailsHandler}
 }
 
-func registerHandlers(router *mux.Router, handlers []RequestHandler) {
+func registerHandlers(router *gin.Engine, handlers []RequestHandler) {
 	for _, handler := range handlers {
-		router.HandleFunc(handler.GetPath(), GetHandlerFunction(handler)).Methods(handler.GetMethod())
+		router.Handle(handler.GetMethod(), handler.GetPath(), handler.HandleRequest)
 	}
 }

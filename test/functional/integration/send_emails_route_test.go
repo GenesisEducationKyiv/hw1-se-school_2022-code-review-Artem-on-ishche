@@ -31,7 +31,7 @@ func TestSendEmailsRoute(t *testing.T) {
 }
 
 func createMux() *http.ServeMux {
-	handlers := httpPresentation.InitHandlers(pkg.InitServices())
+	handlers := httpPresentation.initHandlers(pkg.InitServices())
 	subscribeHandler := handlers[1]
 	sendEmailsHandler := handlers[2]
 

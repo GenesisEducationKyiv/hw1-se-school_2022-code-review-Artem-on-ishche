@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"net/http"
 
 	"gses2.app/api/pkg/application"
@@ -20,13 +21,13 @@ func (handler SendEmailsRequestHandler) GetMethod() string {
 	return "POST"
 }
 
-func (handler SendEmailsRequestHandler) GetResponse(request *http.Request) Response {
+func (handler SendEmailsRequestHandler) HandleRequest(c *gin.Context) {
 	err := handler.SendBtcToUahRateEmailsService.SendBtcToUahRateEmails()
 	if errors.Is(err, nil) {
-		return newResponse(http.StatusOK, "Success")
+		c.JSON(http.StatusOK, "Success")
 	} else if errors.Is(err, services.ErrAPIRequestUnsuccessful) {
-		return newResponse(http.StatusBadGateway, "API request has not been successful")
+		c.JSON(http.StatusBadGateway, "API request has not been successful")
 	} else {
-		return newResponse(http.StatusInternalServerError, "Some error has occurred")
+		c.JSON(http.StatusInternalServerError, "Some error has occurred")
 	}
 }

@@ -2,70 +2,56 @@ package http
 
 import (
 	"fmt"
-	"net/http"
-	"net/url"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
-
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
-	httpPresentation "gses2.app/api/pkg/presentation/http"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
-
-type addEmailAddressFunction func(emailAddress models.EmailAddress) error
-
-var addEmailAddressTestFunction addEmailAddressFunction
-
-type addEmailAddressServiceTestDouble struct{}
-
-func (service addEmailAddressServiceTestDouble) AddEmailAddress(emailAddress models.EmailAddress) error {
-	return addEmailAddressTestFunction(emailAddress)
-}
-
-var testSubscribeRequestHandler = httpPresentation.SubscribeRequestHandler{AddEmailAddressService: addEmailAddressServiceTestDouble{}}
 
 func TestSubscribeRequestHandlerWhenParameterIsMissing(t *testing.T) {
 	setAddEmailAddressFunctionToReturnNoError()
 
-	response := testSubscribeRequestHandler.GetResponse(getHTTPRequestWithoutRequiredParameter())
+	recorder := makeSubscribeRequest(getURLWithoutRequiredParameter())
 
-	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
-	assert.Contains(t, response.Message, "parameter")
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.Contains(t, recorder.Body.String(), "parameter")
 }
 
 func TestSubscribeRequestHandlerWhenEmailParameterIsWrong(t *testing.T) {
+	setGetRateWithoutErrorFunctionToReturnRateWithPrice(100)
 	setAddEmailAddressFunctionToReturnNoError()
 
-	response := testSubscribeRequestHandler.GetResponse(getHTTPRequestWithWrongEmailParameter())
+	recorder := makeSubscribeRequest(getURLWithWrongEmailParameter())
 
-	assert.Equal(t, http.StatusBadRequest, response.StatusCode)
-	assert.NotContains(t, response.Message, "parameter")
-	assert.Contains(t, response.Message, "email address")
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.NotContains(t, recorder.Body.String(), "parameter")
+	assert.Contains(t, recorder.Body.String(), "email address")
 }
 
 func TestSubscribeRequestHandlerWhenEmailIsAlreadySaved(t *testing.T) {
 	setAddEmailAddressFunctionToReturnEmailAlreadyExistsError()
 
-	response := testSubscribeRequestHandler.GetResponse(getCorrectHTTPRequest())
+	recorder := makeSubscribeRequest(getCorrectURL())
 
-	assert.Equal(t, http.StatusConflict, response.StatusCode)
+	assert.Equal(t, http.StatusConflict, recorder.Code)
 }
 
 func TestSubscribeRequestHandlerWhenSomeErrorOccurs(t *testing.T) {
 	setAddEmailAddressFunctionToReturnUnknownError()
 
-	response := testSubscribeRequestHandler.GetResponse(getCorrectHTTPRequest())
+	recorder := makeSubscribeRequest(getCorrectURL())
 
-	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 }
 
 func TestSubscribeRequestHandlerWhenEverythingIsOk(t *testing.T) {
 	setAddEmailAddressFunctionToReturnNoError()
 
-	response := testSubscribeRequestHandler.GetResponse(getCorrectHTTPRequest())
+	recorder := makeSubscribeRequest(getCorrectURL())
 
-	assert.Equal(t, http.StatusOK, response.StatusCode)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 }
 
 func setAddEmailAddressFunctionToReturnNoError() {
@@ -86,22 +72,22 @@ func setAddEmailAddressFunctionToReturnUnknownError() {
 	}
 }
 
-func getHTTPRequestWithoutRequiredParameter() *http.Request {
-	return getHTTPRequest("/subscribe?misspelled_email=name@mail.com")
+func getURLWithoutRequiredParameter() string {
+	return "/subscribe"
 }
 
-func getHTTPRequestWithWrongEmailParameter() *http.Request {
-	return getHTTPRequest("/subscribe?email=not.a.valid.email.com")
+func getURLWithWrongEmailParameter() string {
+	return "/subscribe?email=not.a.valid.email.com"
 }
 
-func getCorrectHTTPRequest() *http.Request {
-	return getHTTPRequest("/subscribe?email=name@mail.com")
+func getCorrectURL() string {
+	return "/subscribe?email=name@mail.com"
 }
 
-func getHTTPRequest(rawURL string) *http.Request {
-	requestURL, _ := url.Parse(rawURL)
+func makeSubscribeRequest(url string) *httptest.ResponseRecorder {
+	router, recorder := getRouterAndRecorder()
+	request, _ := http.NewRequest("POST", url, nil)
+	router.ServeHTTP(recorder, request)
 
-	return &http.Request{
-		URL: requestURL,
-	}
+	return recorder
 }
