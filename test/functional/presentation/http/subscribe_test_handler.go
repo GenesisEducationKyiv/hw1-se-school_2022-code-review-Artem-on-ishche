@@ -9,10 +9,10 @@ type addEmailAddressFunction func(emailAddress models.EmailAddress) error
 
 var addEmailAddressTestFunction addEmailAddressFunction
 
-type addEmailAddressServiceTestDouble struct{}
+type rateSubscriptionServiceTestDouble struct{}
 
-func (service addEmailAddressServiceTestDouble) AddEmailAddress(emailAddress models.EmailAddress) error {
-	return addEmailAddressTestFunction(emailAddress)
+func (service rateSubscriptionServiceTestDouble) Subscribe(emailAddress *models.EmailAddress, _ *models.CurrencyPair) error {
+	return addEmailAddressTestFunction(*emailAddress)
 }
 
-var testSubscribeRequestHandler = httpPresentation.SubscribeRequestHandler{AddEmailAddressService: addEmailAddressServiceTestDouble{}}
+var testSubscribeRequestHandler = httpPresentation.SubscribeRequestHandler{RateSubscriptionService: rateSubscriptionServiceTestDouble{}}

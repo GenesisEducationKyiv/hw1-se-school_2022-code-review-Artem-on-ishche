@@ -9,13 +9,13 @@ import (
 
 func SetupRouter(
 	rateService services.ExchangeRateService,
-	subscribeToRateService application.SubscribeToRateService,
+	rateSubscriptionService application.RateSubscriptionService,
 	sendRateEmailsService application.SendRateEmailsService,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
-	handlers := initHandlers(rateService, subscribeToRateService, sendRateEmailsService)
+	handlers := initHandlers(rateService, rateSubscriptionService, sendRateEmailsService)
 
 	registerHandlers(router, handlers)
 
@@ -24,11 +24,11 @@ func SetupRouter(
 
 func initHandlers(
 	rateService services.ExchangeRateService,
-	subscribeToRateService application.SubscribeToRateService,
+	rateSubscriptionService application.RateSubscriptionService,
 	sendRateEmailsService application.SendRateEmailsService,
 ) []RequestHandler {
 	rateHandler := RateRequestHandler{ExchangeRateService: rateService}
-	subscribeHandler := SubscribeRequestHandler{SubscribeToRateService: subscribeToRateService}
+	subscribeHandler := SubscribeRequestHandler{RateSubscriptionService: rateSubscriptionService}
 	sendEmailsHandler := SendEmailsRequestHandler{SendRateEmailsService: sendRateEmailsService}
 
 	return []RequestHandler{rateHandler, subscribeHandler, sendEmailsHandler}

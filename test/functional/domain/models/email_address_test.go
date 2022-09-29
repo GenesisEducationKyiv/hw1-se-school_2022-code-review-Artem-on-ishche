@@ -31,14 +31,14 @@ var invalidEmailAddresses = []string{
 	"who@.",
 }
 
-func TestThatValidEmailsDontProduceErrors(t *testing.T) {
+func TestNewEmailAddress_WithValidInputs_DoNotProduceErrors(t *testing.T) {
 	for _, address := range validEmailAddresses {
 		_, err := models.NewEmailAddress(address)
 		assert.Nil(t, err, fmt.Sprintf("Returned an error on a valid address: %s", address))
 	}
 }
 
-func TestThatInvalidEmailsProduceErrors(t *testing.T) {
+func TestNewEmailAddress_WithInvalidInputs_ProduceErrors(t *testing.T) {
 	for _, address := range invalidEmailAddresses {
 		_, err := models.NewEmailAddress(address)
 		assert.NotNil(t, err, fmt.Sprintf("Didn't return an error on an invalid address: %s", address))

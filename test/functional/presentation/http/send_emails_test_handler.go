@@ -1,17 +1,20 @@
 package http
 
-import httpPresentation "gses2.app/api/pkg/presentation/http"
+import (
+	"gses2.app/api/pkg/domain/models"
+	httpPresentation "gses2.app/api/pkg/presentation/http"
+)
 
 type sendEmailsFunction func() error
 
 var sendBtcToUahRateEmailsTestFunction sendEmailsFunction
 
-type sendBtcToUahRateEmailsServiceTestDouble struct{}
+type sendRateEmailsServiceTestDouble struct{}
 
-func (service sendBtcToUahRateEmailsServiceTestDouble) SendBtcToUahRateEmails() error {
+func (service sendRateEmailsServiceTestDouble) SendRateEmails(*models.CurrencyPair, string) error {
 	return sendBtcToUahRateEmailsTestFunction()
 }
 
 var testSendEmailsHandler = httpPresentation.SendEmailsRequestHandler{
-	SendBtcToUahRateEmailsService: sendBtcToUahRateEmailsServiceTestDouble{},
+	SendRateEmailsService: sendRateEmailsServiceTestDouble{},
 }

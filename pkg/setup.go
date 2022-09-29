@@ -12,7 +12,7 @@ import (
 
 func InitServices() (
 	services.ExchangeRateService,
-	application.SubscribeToRateService,
+	application.RateSubscriptionService,
 	application.SendRateEmailsService,
 ) {
 	genericExchangeRateService := GetGenericExchangeRateService()
@@ -20,7 +20,12 @@ func InitServices() (
 	emailSender := email.GetEmailClient()
 
 	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter)
-	sendBtcToUahRateEmailsService := application.NewSendRateEmailsServiceImpl(config.AdminKey, genericExchangeRateService, repositoryGetter, emailSender)
+	sendBtcToUahRateEmailsService := application.NewSendRateEmailsServiceImpl(
+		config.AdminKey,
+		genericExchangeRateService,
+		repositoryGetter,
+		emailSender,
+	)
 
 	return genericExchangeRateService, subscribeToRateService, sendBtcToUahRateEmailsService
 }

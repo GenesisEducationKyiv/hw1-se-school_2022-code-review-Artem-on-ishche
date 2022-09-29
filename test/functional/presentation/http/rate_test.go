@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-	"gses2.app/api/pkg/domain/services"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/pkg/domain/services"
 )
 
 func TestBtcToUahRateRequestHandlerWhenApiRequestIsSuccessful(t *testing.T) {

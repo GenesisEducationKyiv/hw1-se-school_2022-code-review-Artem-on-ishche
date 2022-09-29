@@ -1,8 +1,9 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http/httptest"
+
+	"github.com/gin-gonic/gin"
 )
 
 func getRouterAndRecorder() (*gin.Engine, *httptest.ResponseRecorder) {

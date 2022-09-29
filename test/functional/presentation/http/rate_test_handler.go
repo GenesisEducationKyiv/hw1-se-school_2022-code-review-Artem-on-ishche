@@ -9,10 +9,10 @@ type getRateFunction func() (*models.ExchangeRate, error)
 
 var getRateTestFunction getRateFunction
 
-type btcToUahServiceTestDouble struct{}
+type rateServiceTestDouble struct{}
 
-func (service btcToUahServiceTestDouble) GetBtcToUahRate() (*models.ExchangeRate, error) {
+func (service rateServiceTestDouble) GetExchangeRate(models.CurrencyPair) (*models.ExchangeRate, error) {
 	return getRateTestFunction()
 }
 
-var testBtcToUahHandler = httpPresentation.RateRequestHandler{BtcToUahService: btcToUahServiceTestDouble{}}
+var testBtcToUahHandler = httpPresentation.RateRequestHandler{ExchangeRateService: rateServiceTestDouble{}}

@@ -2,11 +2,13 @@ package http
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"gses2.app/api/pkg/domain/services"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"gses2.app/api/pkg/domain/services"
 )
 
 func TestSendEmailsHandlerWhenEverythingIsOk(t *testing.T) {

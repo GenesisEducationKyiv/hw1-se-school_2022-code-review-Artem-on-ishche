@@ -23,7 +23,7 @@ var currencyTests = []currencyTest{
 	{"cur", "CUR"},
 }
 
-func TestThatCurrencyNameIsUppercase(t *testing.T) {
+func TestNewCurrency_WithCustomData_MakesNamesUppercase(t *testing.T) {
 	for _, data := range currencyTests {
 		currency := models.NewCurrency(data.provided)
 

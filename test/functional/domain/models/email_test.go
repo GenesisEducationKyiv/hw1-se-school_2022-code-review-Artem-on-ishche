@@ -20,7 +20,7 @@ var emailTests = []emailTest{
 	{"BTC Quote UAH rate", "The current rate is 831311.2341 UAH for 1 BTC"},
 }
 
-func TestEmailConstructor(t *testing.T) {
+func TestNewEmail_WithCustomData_ConstructsCorrectEmails(t *testing.T) {
 	for _, test := range emailTests {
 		email := models.NewEmail(test.title, test.body)
 

@@ -28,11 +28,11 @@ func (handler SendEmailsRequestHandler) GetMethod() string {
 	return "POST"
 }
 
-func (handler SendEmailsRequestHandler) HandleRequest(c *gin.Context) {
+func (handler SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) {
 	var params sendEmailsRequestParameters
 
-	if err := c.ShouldBind(&params); err != nil {
-		c.JSON(http.StatusBadRequest, "Input parameters are wrong")
+	if err := ctx.ShouldBind(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, "Input parameters are wrong")
 
 		return
 	}
@@ -42,12 +42,12 @@ func (handler SendEmailsRequestHandler) HandleRequest(c *gin.Context) {
 
 	err := handler.SendRateEmailsService.SendRateEmails(pair, key)
 	if errors.Is(err, nil) {
-		c.JSON(http.StatusOK, "Success")
+		ctx.JSON(http.StatusOK, "Success")
 	} else if errors.Is(err, application.ErrValidationError) {
-		c.JSON(http.StatusUnauthorized, "Provided key is not valid")
+		ctx.JSON(http.StatusUnauthorized, "Provided key is not valid")
 	} else if errors.Is(err, services.ErrAPIRequestUnsuccessful) {
-		c.JSON(http.StatusBadGateway, "API request has not been successful")
+		ctx.JSON(http.StatusBadGateway, "API request has not been successful")
 	} else {
-		c.JSON(http.StatusInternalServerError, "Some error has occurred")
+		ctx.JSON(http.StatusInternalServerError, "Some error has occurred")
 	}
 }

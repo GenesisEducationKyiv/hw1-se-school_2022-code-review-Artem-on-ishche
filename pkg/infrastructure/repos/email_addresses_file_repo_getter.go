@@ -13,7 +13,9 @@ func NewEmailAddressesFileRepoGetter() *EmailAddressesFileRepoGetter {
 	return &EmailAddressesFileRepoGetter{}
 }
 
-func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepository(currencyPair *models.CurrencyPair) services.EmailAddressesRepository {
+func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepository(
+	currencyPair *models.CurrencyPair,
+) services.EmailAddressesRepository {
 	if getter.repos == nil {
 		getter.repos = make(map[string]services.EmailAddressesRepository)
 	}

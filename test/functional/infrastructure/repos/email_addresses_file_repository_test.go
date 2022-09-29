@@ -11,12 +11,14 @@ import (
 	"gses2.app/api/pkg/infrastructure/repos"
 )
 
+var filename = "file.txt"
+
 func TestIsEmailAddressAlreadySavedWithEmptyFile(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
 
-	isSaved, err := repos.NewEmailAddressesFileRepository().IsSaved(emailAddress)
+	isSaved, err := repos.NewEmailAddressesFileRepository(filename).IsSaved(emailAddress)
 
 	assert.NoError(t, err)
 	assert.False(t, isSaved)
@@ -29,7 +31,7 @@ func TestIsEmailAddressAlreadySavedWhenItIsNot(t *testing.T) {
 
 	createNonEmptyFileWithEmail("random_email@gmail.com")
 
-	isSaved, err := repos.NewEmailAddressesFileRepository().IsSaved(emailAddress)
+	isSaved, err := repos.NewEmailAddressesFileRepository(filename).IsSaved(emailAddress)
 
 	assert.NoError(t, err)
 	assert.False(t, isSaved)
@@ -43,7 +45,7 @@ func TestIsEmailAddressAlreadySavedWhenItIs(t *testing.T) {
 	emailAddress := getEmailAddress()
 	createNonEmptyFileWithEmail(string(emailAddress))
 
-	isSaved, err := repos.NewEmailAddressesFileRepository().IsSaved(emailAddress)
+	isSaved, err := repos.NewEmailAddressesFileRepository(filename).IsSaved(emailAddress)
 
 	assert.NoError(t, err)
 	assert.True(t, isSaved)
@@ -56,7 +58,7 @@ func TestAddEmailAddressWhenFileDoesNotExist(t *testing.T) {
 
 	emailAddress := getEmailAddress()
 
-	err := repos.NewEmailAddressesFileRepository().Add(emailAddress)
+	err := repos.NewEmailAddressesFileRepository(filename).Add(emailAddress)
 
 	assert.NoError(t, err)
 
@@ -70,7 +72,7 @@ func TestAddEmailAddressWhenFileDoesNotContainIt(t *testing.T) {
 
 	createNonEmptyFileWithEmail("random_email@gmail.com")
 
-	err := repos.NewEmailAddressesFileRepository().Add(emailAddress)
+	err := repos.NewEmailAddressesFileRepository(filename).Add(emailAddress)
 
 	assert.NoError(t, err)
 
@@ -84,7 +86,7 @@ func TestAddEmailAddressWhenFileContainsIt(t *testing.T) {
 
 	createNonEmptyFileWithEmail(string(emailAddress))
 
-	err := repos.NewEmailAddressesFileRepository().Add(emailAddress)
+	err := repos.NewEmailAddressesFileRepository(filename).Add(emailAddress)
 
 	assert.NoError(t, err)
 
@@ -94,7 +96,7 @@ func TestAddEmailAddressWhenFileContainsIt(t *testing.T) {
 func TestGetEmailAddressesWhenFileDoesNotExist(t *testing.T) {
 	config.LoadEnv()
 
-	emailAddressStrings, err := repos.NewEmailAddressesFileRepository().GetAll()
+	emailAddressStrings, err := repos.NewEmailAddressesFileRepository(filename).GetAll()
 
 	assert.NoError(t, err)
 	assert.Empty(t, emailAddressStrings)
@@ -108,7 +110,7 @@ func TestGetEmailAddressesWhenFileContainsOneAddress(t *testing.T) {
 	emailAddress := getEmailAddress()
 	createNonEmptyFileWithEmail(string(emailAddress))
 
-	emailAddresses, err := repos.NewEmailAddressesFileRepository().GetAll()
+	emailAddresses, err := repos.NewEmailAddressesFileRepository(filename).GetAll()
 
 	assert.NoError(t, err)
 	assert.Contains(t, emailAddresses, emailAddress)
@@ -129,7 +131,7 @@ func TestGetEmailAddressesWhenFileContainsManyAddresses(t *testing.T) {
 	config.LoadEnv()
 	createNonEmptyFileWithManyEmails(providedEmailAddresses)
 
-	actualEmailAddresses, err := repos.NewEmailAddressesFileRepository().GetAll()
+	actualEmailAddresses, err := repos.NewEmailAddressesFileRepository(filename).GetAll()
 
 	assert.NoError(t, err)
 	assert.Equal(t, providedEmailAddresses, actualEmailAddresses)
@@ -141,7 +143,7 @@ func TestSuccessiveAddAndIsSavedCalls(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
-	emailAddressesStorage := repos.NewEmailAddressesFileRepository()
+	emailAddressesStorage := repos.NewEmailAddressesFileRepository(filename)
 
 	addErr := emailAddressesStorage.Add(emailAddress)
 	contains, isSavedErr := emailAddressesStorage.IsSaved(emailAddress)
@@ -157,7 +159,7 @@ func TestSuccessiveAddAndGetCalls(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
-	emailAddressesStorage := repos.NewEmailAddressesFileRepository()
+	emailAddressesStorage := repos.NewEmailAddressesFileRepository(filename)
 
 	addErr := emailAddressesStorage.Add(emailAddress)
 	savedAddresses, isSavedErr := emailAddressesStorage.GetAll()
@@ -173,7 +175,7 @@ func TestSuccessiveCallsToAllThreeEmailAddressStorageFunctions(t *testing.T) {
 	config.LoadEnv()
 
 	emailAddress := getEmailAddress()
-	emailAddressesStorage := repos.NewEmailAddressesFileRepository()
+	emailAddressesStorage := repos.NewEmailAddressesFileRepository(filename)
 
 	containsBeforeAdding, isSavedErr1 := emailAddressesStorage.IsSaved(emailAddress)
 	savedAddressStringsBeforeAdding, getAllErr1 := emailAddressesStorage.GetAll()
@@ -202,13 +204,13 @@ func getEmailAddress() models.EmailAddress {
 }
 
 func createNonEmptyFileWithEmail(emailAddressString string) {
-	file, _ := os.Create(config.Filename)
+	file, _ := os.Create(filename)
 	_, _ = file.WriteString(emailAddressString)
 	_ = file.Close()
 }
 
 func createNonEmptyFileWithManyEmails(emailAddresses []models.EmailAddress) {
-	file, _ := os.Create(config.Filename)
+	file, _ := os.Create(filename)
 
 	for _, emailAddress := range emailAddresses {
 		_, _ = file.WriteString(emailAddress.String() + "\n")
@@ -218,5 +220,5 @@ func createNonEmptyFileWithManyEmails(emailAddresses []models.EmailAddress) {
 }
 
 func deleteFile() {
-	_ = os.Remove(config.Filename)
+	_ = os.Remove(filename)
 }
