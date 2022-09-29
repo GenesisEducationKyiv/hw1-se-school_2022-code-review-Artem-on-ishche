@@ -12,10 +12,12 @@ import (
 
 type subscribeRequestParameters struct {
 	EmailAddrString string `form:"email" binding:"required"`
+	Base            string `form:"base"`
+	Quote           string `form:"quote"`
 }
 
 type SubscribeRequestHandler struct {
-	AddEmailAddressService application.AddEmailAddressService
+	SubscribeToRateService application.SubscribeToRateService
 }
 
 func (handler SubscribeRequestHandler) GetPath() string {
@@ -29,9 +31,8 @@ func (handler SubscribeRequestHandler) GetMethod() string {
 func (handler SubscribeRequestHandler) HandleRequest(c *gin.Context) {
 	var params subscribeRequestParameters
 
-	err := c.ShouldBind(&params)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "Required parameter 'email' is missing")
+	if err := c.ShouldBind(&params); err != nil {
+		c.JSON(http.StatusBadRequest, "Input parameters are wrong")
 
 		return
 	}
@@ -43,7 +44,9 @@ func (handler SubscribeRequestHandler) HandleRequest(c *gin.Context) {
 		return
 	}
 
-	err = handler.AddEmailAddressService.AddEmailAddress(*emailAddress)
+	pair := getCurrencyPair(params.Base, params.Quote)
+
+	err = handler.SubscribeToRateService.Subscribe(emailAddress, pair)
 	if err == nil {
 		c.JSON(http.StatusOK, "Success")
 	} else if isEmailAlreadySaved(err, emailAddress.String()) {

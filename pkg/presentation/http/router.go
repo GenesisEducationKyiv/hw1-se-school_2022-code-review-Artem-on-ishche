@@ -2,18 +2,20 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"gses2.app/api/pkg/application"
+	"gses2.app/api/pkg/domain/services"
 )
 
 func SetupRouter(
-	btcToUahService application.BtcToUahRateService,
-	addEmailAddressService application.AddEmailAddressService,
-	sendBtcToUahRateEmailsService application.SendBtcToUahRateEmailsService,
+	rateService services.ExchangeRateService,
+	subscribeToRateService application.SubscribeToRateService,
+	sendRateEmailsService application.SendRateEmailsService,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
-	handlers := initHandlers(btcToUahService, addEmailAddressService, sendBtcToUahRateEmailsService)
+	handlers := initHandlers(rateService, subscribeToRateService, sendRateEmailsService)
 
 	registerHandlers(router, handlers)
 
@@ -21,13 +23,13 @@ func SetupRouter(
 }
 
 func initHandlers(
-	btcToUahService application.BtcToUahRateService,
-	addEmailAddressService application.AddEmailAddressService,
-	sendBtcToUahRateEmailsService application.SendBtcToUahRateEmailsService,
+	rateService services.ExchangeRateService,
+	subscribeToRateService application.SubscribeToRateService,
+	sendRateEmailsService application.SendRateEmailsService,
 ) []RequestHandler {
-	rateHandler := BtcToUahRateRequestHandler{BtcToUahService: btcToUahService}
-	subscribeHandler := SubscribeRequestHandler{AddEmailAddressService: addEmailAddressService}
-	sendEmailsHandler := SendEmailsRequestHandler{SendBtcToUahRateEmailsService: sendBtcToUahRateEmailsService}
+	rateHandler := RateRequestHandler{ExchangeRateService: rateService}
+	subscribeHandler := SubscribeRequestHandler{SubscribeToRateService: subscribeToRateService}
+	sendEmailsHandler := SendEmailsRequestHandler{SendRateEmailsService: sendRateEmailsService}
 
 	return []RequestHandler{rateHandler, subscribeHandler, sendEmailsHandler}
 }

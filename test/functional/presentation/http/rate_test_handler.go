@@ -15,4 +15,4 @@ func (service btcToUahServiceTestDouble) GetBtcToUahRate() (*models.ExchangeRate
 	return getRateTestFunction()
 }
 
-var testBtcToUahHandler = httpPresentation.BtcToUahRateRequestHandler{BtcToUahService: btcToUahServiceTestDouble{}}
+var testBtcToUahHandler = httpPresentation.RateRequestHandler{BtcToUahService: btcToUahServiceTestDouble{}}

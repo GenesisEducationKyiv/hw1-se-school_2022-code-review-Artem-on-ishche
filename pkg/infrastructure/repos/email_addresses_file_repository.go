@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"os"
 
-	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -13,8 +12,8 @@ type emailAddressesFileRepository struct {
 	filename string
 }
 
-func GetEmailAddressesFileRepository() services.EmailAddressesRepository {
-	return &emailAddressesFileRepository{filename: config.Filename}
+func NewEmailAddressesFileRepository(filename string) services.EmailAddressesRepository {
+	return &emailAddressesFileRepository{filename: filename}
 }
 
 func (repository emailAddressesFileRepository) IsSaved(emailAddress models.EmailAddress) (bool, error) {
@@ -60,7 +59,7 @@ func (repository emailAddressesFileRepository) Add(emailAddress models.EmailAddr
 func (repository emailAddressesFileRepository) GetAll() ([]models.EmailAddress, error) {
 	var emailAddresses []models.EmailAddress
 
-	file, err := os.Open(config.Filename)
+	file, err := os.Open(repository.filename)
 	if err != nil {
 		return emailAddresses, nil
 	}

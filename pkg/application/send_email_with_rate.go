@@ -1,51 +1,64 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
 
-type SendBtcToUahRateEmailsService interface {
-	SendBtcToUahRateEmails() error
+var ErrValidationError = errors.New("validation key is wrong")
+
+type SendRateEmailsService interface {
+	SendRateEmails(pair *models.CurrencyPair, key string) error
 }
 
-type sendBtcToUahRateEmailsServiceImpl struct {
-	rateService BtcToUahRateService
-	repository  services.EmailAddressesRepository
-	sender      services.EmailSender
+type sendRateEmailsServiceImpl struct {
+	validationKey    string
+	rateService      services.ExchangeRateService
+	repositoryGetter services.EmailAddressesRepositoryGetter
+	sender           services.EmailSender
 }
 
-func NewSendBtcToUahRateEmailsServiceImpl(
-	rateService BtcToUahRateService, repository services.EmailAddressesRepository, sender services.EmailSender,
-) SendBtcToUahRateEmailsService {
-	return &sendBtcToUahRateEmailsServiceImpl{
-		rateService: rateService,
-		repository:  repository,
-		sender:      sender,
+func NewSendRateEmailsServiceImpl(
+	validationKey string,
+	rateService services.ExchangeRateService,
+	repositoryGetter services.EmailAddressesRepositoryGetter,
+	sender services.EmailSender,
+) SendRateEmailsService {
+	return &sendRateEmailsServiceImpl{
+		validationKey:    validationKey,
+		rateService:      rateService,
+		repositoryGetter: repositoryGetter,
+		sender:           sender,
 	}
 }
 
-func (sendRateEmailsService *sendBtcToUahRateEmailsServiceImpl) SendBtcToUahRateEmails() error {
-	rate, err := sendRateEmailsService.rateService.GetBtcToUahRate()
+func (service *sendRateEmailsServiceImpl) SendRateEmails(pair *models.CurrencyPair, key string) error {
+	if key != service.validationKey {
+		return ErrValidationError
+	}
+
+	rate, err := service.rateService.GetExchangeRate(*pair)
 	if err != nil {
 		return err
 	}
 
 	email := getEmailWithRate(rate)
+	repo := service.repositoryGetter.GetEmailAddressesRepository(pair)
 
-	receiverAddresses, err := sendRateEmailsService.repository.GetAll()
+	receiverAddresses, err := repo.GetAll()
 	if err != nil {
 		return err
 	}
 
-	return sendRateEmailsService.sender.SendEmails(email, receiverAddresses)
+	return service.sender.SendEmails(*email, receiverAddresses)
 }
 
-func getEmailWithRate(rate *models.ExchangeRate) models.EmailMessage {
-	title := "BTC Quote UAH rate"
-	body := fmt.Sprintf("Зараз 1 біткоїн коштує %v грн\n", rate.Price)
+func getEmailWithRate(rate *models.ExchangeRate) *models.EmailMessage {
+	title := fmt.Sprintf("%s exchange rate", rate.String())
+	body := fmt.Sprintf("Currently 1 %s costs %v %s", rate.CurrencyPair.Base, rate.Price, rate.CurrencyPair.Quote)
 
-	return *models.NewEmail(title, body)
+	return models.NewEmail(title, body)
 }

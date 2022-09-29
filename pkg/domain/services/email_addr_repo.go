@@ -18,3 +18,7 @@ type EmailAddressesRepository interface {
 	Add(emailAddress models.EmailAddress) error
 	GetAll() ([]models.EmailAddress, error)
 }
+
+type EmailAddressesRepositoryGetter interface {
+	GetEmailAddressesRepository(currencyPair *models.CurrencyPair) EmailAddressesRepository
+}

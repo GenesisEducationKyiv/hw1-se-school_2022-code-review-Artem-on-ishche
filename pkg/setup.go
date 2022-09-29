@@ -11,19 +11,18 @@ import (
 )
 
 func InitServices() (
-	application.BtcToUahRateService,
-	application.AddEmailAddressService,
-	application.SendBtcToUahRateEmailsService,
+	services.ExchangeRateService,
+	application.SubscribeToRateService,
+	application.SendRateEmailsService,
 ) {
 	genericExchangeRateService := GetGenericExchangeRateService()
-	emailAddressesRepository := repos.GetEmailAddressesFileRepository()
+	repositoryGetter := repos.NewEmailAddressesFileRepoGetter()
 	emailSender := email.GetEmailClient()
 
-	btcToUahService := application.NewBtcToUahServiceImpl(genericExchangeRateService)
-	addEmailAddressService := application.NewAddEmailAddressServiceImpl(emailAddressesRepository)
-	sendBtcToUahRateEmailsService := application.NewSendBtcToUahRateEmailsServiceImpl(btcToUahService, emailAddressesRepository, emailSender)
+	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter)
+	sendBtcToUahRateEmailsService := application.NewSendRateEmailsServiceImpl(config.AdminKey, genericExchangeRateService, repositoryGetter, emailSender)
 
-	return btcToUahService, addEmailAddressService, sendBtcToUahRateEmailsService
+	return genericExchangeRateService, subscribeToRateService, sendBtcToUahRateEmailsService
 }
 
 func GetGenericExchangeRateService() services.ExchangeRateService {

@@ -76,7 +76,7 @@ func TestThatSubscribeRouteReturnsStatusConflictOnConsecutiveCallsWithTheSameEma
 }
 
 func getTestServerWithSubscribeRoute() *httptest.Server {
-	emailAddressesRepository := repos.GetEmailAddressesFileRepository()
+	emailAddressesRepository := repos.NewEmailAddressesFileRepository()
 	addEmailAddressService := application.NewAddEmailAddressServiceImpl(emailAddressesRepository)
 	subscribeHandler := httpPresentation.SubscribeRequestHandler{AddEmailAddressService: addEmailAddressService}
 	testServer := httptest.NewServer(http.HandlerFunc(httpPresentation.GetHandlerFunction(subscribeHandler)))

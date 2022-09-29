@@ -70,7 +70,7 @@ func getResponseBodyContent(t *testing.T, response http.Response) string {
 func getTestServerWithRateRoute() *httptest.Server {
 	genericExchangeRateService := pkg.GetGenericExchangeRateService()
 	btcToUahService := application.NewBtcToUahServiceImpl(genericExchangeRateService)
-	rateHandler := httpPresentation.BtcToUahRateRequestHandler{BtcToUahService: btcToUahService}
+	rateHandler := httpPresentation.RateRequestHandler{BtcToUahService: btcToUahService}
 	testServer := httptest.NewServer(http.HandlerFunc(httpPresentation.GetHandlerFunction(rateHandler)))
 
 	return testServer
