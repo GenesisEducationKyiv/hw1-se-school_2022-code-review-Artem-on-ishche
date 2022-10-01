@@ -1,11 +1,11 @@
 package application
 
 import (
-	"gses2.app/api/pkg/application"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 )
 

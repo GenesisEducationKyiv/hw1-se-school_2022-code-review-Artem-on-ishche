@@ -1,12 +1,12 @@
 package rates
 
 import (
-	"gses2.app/api/pkg/application"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )

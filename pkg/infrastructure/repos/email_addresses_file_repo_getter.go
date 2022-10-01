@@ -1,10 +1,11 @@
 package repos
 
 import (
-	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 	"os"
 	"strings"
+
+	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/pkg/domain/services"
 )
 
 const (
@@ -44,14 +45,10 @@ func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepositories(
 	}
 
 	pairString := currencyPair.String()
+	repo := NewEmailAddressesFileRepository(dirName, pairString+fileExtension)
 
-	repo, found := getter.repos[pairString]
-	if !found {
-		repo = NewEmailAddressesFileRepository(dirName, pairString+fileExtension)
-
-		getter.repos[pairString] = repo
-		filteredRepos = append(filteredRepos, repo)
-	}
+	getter.repos[pairString] = repo
+	filteredRepos = append(filteredRepos, repo)
 
 	return filteredRepos
 }
@@ -59,7 +56,7 @@ func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepositories(
 func (getter EmailAddressesFileRepoGetter) GetAllEmailAddressesRepositories() []services.EmailAddressesRepository {
 	getter.loadAllRepos()
 
-	repos := make([]services.EmailAddressesRepository, len(getter.repos))
+	repos := make([]services.EmailAddressesRepository, 0)
 
 	for _, repo := range getter.repos {
 		repos = append(repos, repo)

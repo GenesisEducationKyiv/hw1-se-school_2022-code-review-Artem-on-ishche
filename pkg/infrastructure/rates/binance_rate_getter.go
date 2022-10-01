@@ -3,12 +3,12 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
-	"gses2.app/api/pkg/application"
 	"strconv"
 	"time"
 
 	"gopkg.in/resty.v0"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 )
 

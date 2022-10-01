@@ -48,7 +48,9 @@ func newInMemoryEmailAddressesRepositoryGetter(repo inMemoryEmailAddressesReposi
 	return &inMemoryEmailAddressesRepositoryGetter{repo: repo}
 }
 
-func (g inMemoryEmailAddressesRepositoryGetter) GetEmailAddressesRepositories(currencyPair *models.CurrencyPair) []services.EmailAddressesRepository {
+func (g inMemoryEmailAddressesRepositoryGetter) GetEmailAddressesRepositories(
+	currencyPair *models.CurrencyPair,
+) []services.EmailAddressesRepository {
 	repos := make([]services.EmailAddressesRepository, 0)
 	if *currencyPair == btcUahPair {
 		return repos

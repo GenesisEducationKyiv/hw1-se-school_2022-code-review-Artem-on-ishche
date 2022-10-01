@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -70,7 +71,13 @@ func (service *sendRateEmailsServiceImpl) sendEmailsForOneRepo(repo services.Ema
 
 func getEmailWithRate(rate *models.ExchangeRate) *models.EmailMessage {
 	title := fmt.Sprintf("%s exchange rate", rate.String())
-	body := fmt.Sprintf("At the time of %s, 1 %s costs %v %s", rate.Timestamp.String(), rate.CurrencyPair.Base, rate.Price, rate.CurrencyPair.Quote)
+	body := fmt.Sprintf(
+		"At the time of %s, 1 %s costs %v %s",
+		rate.Timestamp.String(),
+		rate.CurrencyPair.Base,
+		rate.Price,
+		rate.CurrencyPair.Quote,
+	)
 
 	return models.NewEmail(title, body)
 }

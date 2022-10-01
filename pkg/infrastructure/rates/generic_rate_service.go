@@ -1,11 +1,11 @@
 package rates
 
 import (
-	"gses2.app/api/pkg/application"
 	"net/http"
 
 	"gopkg.in/resty.v0"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 )
 
