@@ -9,7 +9,7 @@
 
 ---
 ### Розширена архітектура додатку: </br></br>
-![arch-diagram](https://user-images.githubusercontent.com/80548250/192093383-7edf7e2a-1513-464f-a810-6029f3a4c77e.png)
+![arch-diagram](https://user-images.githubusercontent.com/80548250/193132327-3e887d58-7366-46b8-a8cc-619254e54bb6.png)
 
 Файл `pkg/setup.go` містить boilerplate code, який створює потрібні сервіси і налаштовує їх.
 
