@@ -2,10 +2,11 @@ package repos
 
 import (
 	"bufio"
-	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 	"log"
 	"os"
+
+	"gses2.app/api/pkg/application"
+	"gses2.app/api/pkg/domain/models"
 )
 
 func safelyClose(file *os.File) {
@@ -34,7 +35,7 @@ func scanAddressesFromFile(file *os.File) ([]models.EmailAddress, error) {
 
 		emailAddress, err := models.NewEmailAddress(text)
 		if err != nil {
-			return emailAddresses, services.ErrEmailStorageFailure
+			return emailAddresses, application.ErrEmailStorageFailure
 		}
 
 		emailAddresses = append(emailAddresses, *emailAddress)

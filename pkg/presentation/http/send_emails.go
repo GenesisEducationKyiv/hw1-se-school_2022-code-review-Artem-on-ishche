@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"gses2.app/api/pkg/application"
-	"gses2.app/api/pkg/domain/services"
 )
 
 type sendEmailsRequestParameters struct {
@@ -45,7 +44,7 @@ func (handler SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, "Success")
 	} else if errors.Is(err, application.ErrValidationError) {
 		ctx.JSON(http.StatusUnauthorized, "Provided key is not valid")
-	} else if errors.Is(err, services.ErrAPIRequestUnsuccessful) {
+	} else if errors.Is(err, application.ErrAPIRequestUnsuccessful) {
 		ctx.JSON(http.StatusBadGateway, "API request has not been successful")
 	} else {
 		ctx.JSON(http.StatusInternalServerError, "Some error has occurred")

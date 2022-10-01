@@ -3,13 +3,13 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
+	"gses2.app/api/pkg/application"
 	"time"
 
 	"gopkg.in/resty.v0"
 
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
 
 const coinAPIRequestFormatString = "https://rest.coinapi.io/v1/exchangerate/%s/%s"
@@ -49,12 +49,12 @@ func (c coinAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse, 
 
 	err := json.Unmarshal(responseBody, &result)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	timestamp, err := time.Parse(timeLayout, result.Time)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	return &parsedResponse{

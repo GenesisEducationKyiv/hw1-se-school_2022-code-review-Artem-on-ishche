@@ -3,6 +3,7 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
+	"gses2.app/api/pkg/application"
 	"strconv"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
 
 const nomicsRequestFormatString = "https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v"
@@ -55,11 +55,11 @@ func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse
 
 	err := json.Unmarshal(responseBody, &results)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	if len(results) == 0 {
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	result := results[0]
@@ -67,12 +67,12 @@ func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse
 
 	price, err := strconv.ParseFloat(result.Price, bitSize)
 	if err != nil {
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	timestamp, err := time.Parse(timeLayout, result.PriceTimestamp)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	return &parsedResponse{

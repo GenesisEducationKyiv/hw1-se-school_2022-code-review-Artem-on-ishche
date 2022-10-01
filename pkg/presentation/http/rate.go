@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+	"gses2.app/api/pkg/application"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -49,9 +50,9 @@ func (handler RateRequestHandler) HandleRequest(ctx *gin.Context) {
 	exchangeRate, err := handler.ExchangeRateService.GetExchangeRate(*pair)
 	if errors.Is(err, nil) {
 		ctx.JSON(http.StatusOK, exchangeRate.Price)
-	} else if errors.Is(err, services.ErrAPIRequestUnsuccessful) {
+	} else if errors.Is(err, application.ErrAPIRequestUnsuccessful) {
 		ctx.JSON(http.StatusBadGateway, "API request has not been successful")
-	} else if errors.Is(err, services.ErrAPIResponseUnmarshallError) {
+	} else if errors.Is(err, application.ErrAPIResponseUnmarshallError) {
 		ctx.JSON(http.StatusBadGateway, "API returned unexpected response")
 	} else {
 		ctx.JSON(http.StatusInternalServerError, "Some unexpected error has occurred")

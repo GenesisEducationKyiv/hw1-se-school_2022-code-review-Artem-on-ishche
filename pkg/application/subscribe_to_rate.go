@@ -26,7 +26,7 @@ func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress
 	}
 
 	if isEmailSaved {
-		return services.ErrEmailAddressAlreadyExists(emailAddress.String())
+		return ErrEmailAddressAlreadyExists(emailAddress.String())
 	}
 
 	return repository.Add(*emailAddress)

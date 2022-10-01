@@ -1,12 +1,12 @@
 package rates
 
 import (
+	"gses2.app/api/pkg/application"
 	"net/http"
 
 	"gopkg.in/resty.v0"
 
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
 
 const timeLayout = "2006-01-02T15:04:05.999Z"
@@ -42,13 +42,13 @@ func (service *exchangeRateService) GetExchangeRate(pair models.CurrencyPair) (*
 func (service *exchangeRateService) getExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
 	resp, err := service.makeAPIRequest(pair)
 	if err != nil {
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	if resp.StatusCode() != http.StatusOK {
 		service.notifyMediatorAboutFailureAPIResponseReceived(pair, resp)
 
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	parsedResponse, err := service.concreteRateClient.parseResponseBody(resp.Body)

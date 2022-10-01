@@ -3,13 +3,13 @@ package rates
 import (
 	"encoding/json"
 	"fmt"
+	"gses2.app/api/pkg/application"
 	"strconv"
 	"time"
 
 	"gopkg.in/resty.v0"
 
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
 
 const binanceRequestFormatString = "https://api.binance.com/api/v3/avgPrice?symbol=%s%s"
@@ -53,14 +53,14 @@ func (c *binanceAPIClient) parseResponseBody(responseBody []byte) (*parsedRespon
 
 	err := json.Unmarshal(responseBody, &result)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	bitSize := 64
 
 	price, err := strconv.ParseFloat(result.Price, bitSize)
 	if err != nil {
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	return &parsedResponse{
