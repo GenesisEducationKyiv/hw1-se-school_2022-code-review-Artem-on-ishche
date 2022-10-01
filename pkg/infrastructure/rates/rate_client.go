@@ -14,7 +14,7 @@ type parsedResponse struct {
 }
 
 type exchangeRateAPIClient interface {
-	getName() string
+	name() string
 	getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string
 	getAPIRequest() *resty.Request
 	parseResponseBody(responseBody []byte) (*parsedResponse, error)

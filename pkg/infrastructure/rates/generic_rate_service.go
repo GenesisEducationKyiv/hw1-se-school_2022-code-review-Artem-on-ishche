@@ -70,7 +70,7 @@ func (service *exchangeRateService) makeAPIRequest(pair models.CurrencyPair) (*r
 func (service *exchangeRateService) notifyMediatorAboutFailureAPIResponseReceived(pair models.CurrencyPair, response *resty.Response) {
 	(*service.mediator).Notify(FailureAPIResponseReceivedEvent{failureAPIResponseReceivedEventData{
 		pair:       &pair,
-		provider:   service.concreteRateClient.getName(),
+		provider:   service.concreteRateClient.name(),
 		statusCode: response.StatusCode(),
 	}})
 }
@@ -78,7 +78,7 @@ func (service *exchangeRateService) notifyMediatorAboutFailureAPIResponseReceive
 func (service *exchangeRateService) notifyMediatorAboutSuccessAPIResponseReceived(pair models.CurrencyPair, response *parsedResponse) {
 	(*service.mediator).Notify(SuccessAPIResponseReceivedEvent{successAPIResponseReceivedEventData{
 		pair:     &pair,
-		provider: service.concreteRateClient.getName(),
+		provider: service.concreteRateClient.name(),
 		response: response,
 	}})
 }

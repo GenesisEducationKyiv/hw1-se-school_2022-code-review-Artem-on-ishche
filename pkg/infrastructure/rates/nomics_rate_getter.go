@@ -13,6 +13,8 @@ import (
 	"gses2.app/api/pkg/domain/services"
 )
 
+const nomicsRequestFormatString = "https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v"
+
 type receivedNomicsAPIResponse struct {
 	Price          string `json:"price"`
 	PriceTimestamp string `json:"price_timestamp"`
@@ -31,13 +33,13 @@ func (factory NomicsAPIClientFactory) CreateRateService() ExchangeRateServiceCha
 
 type nomicsAPIClient struct{}
 
-func (c nomicsAPIClient) getName() string {
+func (c nomicsAPIClient) name() string {
 	return "Nomics"
 }
 
 func (c nomicsAPIClient) getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string {
 	return fmt.Sprintf(
-		"https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
+		nomicsRequestFormatString,
 		config.NomicsAPIKeyValue,
 		pair.Base.Name,
 		pair.Quote.Name,

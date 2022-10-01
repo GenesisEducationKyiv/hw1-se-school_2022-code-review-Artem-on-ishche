@@ -12,6 +12,8 @@ import (
 	"gses2.app/api/pkg/domain/services"
 )
 
+const coinAPIRequestFormatString = "https://rest.coinapi.io/v1/exchangerate/%s/%s"
+
 type receivedCoinAPIResponse struct {
 	Time string  `json:"time"`
 	Rate float64 `json:"rate"`
@@ -30,12 +32,12 @@ func (factory CoinAPIClientFactory) CreateRateService() ExchangeRateServiceChain
 
 type coinAPIClient struct{}
 
-func (c coinAPIClient) getName() string {
+func (c coinAPIClient) name() string {
 	return "Coinbase"
 }
 
 func (c coinAPIClient) getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string {
-	return fmt.Sprintf("https://rest.coinapi.io/v1/exchangerate/%v/%v", pair.Base.Name, pair.Quote.Name)
+	return fmt.Sprintf(coinAPIRequestFormatString, pair.Base.Name, pair.Quote.Name)
 }
 
 func (c coinAPIClient) getAPIRequest() *resty.Request {

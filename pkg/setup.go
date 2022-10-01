@@ -39,24 +39,24 @@ func GetGenericExchangeRateService() services.ExchangeRateService {
 
 	coinRateService := rates.CoinAPIClientFactory{Mediator: mediator}.CreateRateService()
 	nomicsRateService := rates.NomicsAPIClientFactory{Mediator: mediator}.CreateRateService()
-	coinMarketCapRateService := rates.CoinMarketCapAPIClientFactory{Mediator: mediator}.CreateRateService()
+	binanceRateService := rates.BinanceAPIClientFactory{Mediator: mediator}.CreateRateService()
 
 	switch config.CryptoCurrencyProvider {
 	case "coin":
 		cacherRateService.SetNext(&coinRateService)
 		coinRateService.SetNext(&nomicsRateService)
-		nomicsRateService.SetNext(&coinMarketCapRateService)
+		nomicsRateService.SetNext(&binanceRateService)
 
 		return cacherRateService
 	case "nomics":
 		cacherRateService.SetNext(&nomicsRateService)
 		nomicsRateService.SetNext(&coinRateService)
-		coinRateService.SetNext(&coinMarketCapRateService)
+		coinRateService.SetNext(&binanceRateService)
 
 		return cacherRateService
-	case "coin_market_cap":
-		cacherRateService.SetNext(&coinMarketCapRateService)
-		coinMarketCapRateService.SetNext(&coinRateService)
+	case "binance":
+		cacherRateService.SetNext(&binanceRateService)
+		binanceRateService.SetNext(&coinRateService)
 		coinRateService.SetNext(&nomicsRateService)
 
 		return cacherRateService
