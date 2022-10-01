@@ -10,6 +10,11 @@ import (
 	"gses2.app/api/pkg/domain/services"
 )
 
+const (
+	defaultBaseName  = "BTC"
+	defaultQuoteName = "UAH"
+)
+
 type rateRequestParameters struct {
 	Base  string `form:"base"`
 	Quote string `form:"quote"`
@@ -36,6 +41,9 @@ func (handler RateRequestHandler) HandleRequest(ctx *gin.Context) {
 		return
 	}
 
+	handleEmptyParameter(&params.Base, defaultBaseName)
+	handleEmptyParameter(&params.Quote, defaultQuoteName)
+
 	pair := getCurrencyPair(params.Base, params.Quote)
 
 	exchangeRate, err := handler.ExchangeRateService.GetExchangeRate(*pair)
@@ -50,15 +58,13 @@ func (handler RateRequestHandler) HandleRequest(ctx *gin.Context) {
 	}
 }
 
+func handleEmptyParameter(param *string, defaultValue string) {
+	if *param == "" {
+		*param = defaultValue
+	}
+}
+
 func getCurrencyPair(baseParam, quoteParam string) *models.CurrencyPair {
-	if baseParam == "" {
-		baseParam = "btc"
-	}
-
-	if quoteParam == "" {
-		quoteParam = "uah"
-	}
-
 	base := models.NewCurrency(baseParam)
 	quote := models.NewCurrency(quoteParam)
 	pair := models.NewCurrencyPair(base, quote)

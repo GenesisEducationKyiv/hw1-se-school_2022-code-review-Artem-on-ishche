@@ -1,6 +1,6 @@
 package models
 
-import "fmt"
+const CurrencySeparator = "-"
 
 type CurrencyPair struct {
 	Base  Currency
@@ -8,7 +8,7 @@ type CurrencyPair struct {
 }
 
 func (pair *CurrencyPair) String() string {
-	return fmt.Sprintf("%s-%s", pair.Base.Name, pair.Quote.Name)
+	return pair.Base.Name + CurrencySeparator + pair.Quote.Name
 }
 
 func NewCurrencyPair(base, quote Currency) CurrencyPair {

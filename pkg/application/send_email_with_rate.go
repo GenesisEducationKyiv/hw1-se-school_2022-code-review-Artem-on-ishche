@@ -3,7 +3,6 @@ package application
 import (
 	"errors"
 	"fmt"
-
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -35,25 +34,38 @@ func NewSendRateEmailsServiceImpl(
 	}
 }
 
-func (service *sendRateEmailsServiceImpl) SendRateEmails(pair *models.CurrencyPair, key string) error {
+func (service *sendRateEmailsServiceImpl) SendRateEmails(passedPair *models.CurrencyPair, key string) error {
 	if key != service.validationKey {
 		return ErrValidationError
 	}
 
-	rate, err := service.rateService.GetExchangeRate(*pair)
+	repos := service.repositoryGetter.GetEmailAddressesRepositories(passedPair)
+
+	for _, repo := range repos {
+		if err := service.sendEmailsForOneRepo(repo); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (service *sendRateEmailsServiceImpl) sendEmailsForOneRepo(repo services.EmailAddressesRepository) error {
+	repoPair := repo.AssociatedCurrencyPair()
+
+	rate, err := service.rateService.GetExchangeRate(*repoPair)
 	if err != nil {
 		return err
 	}
 
 	email := getEmailWithRate(rate)
-	repo := service.repositoryGetter.GetEmailAddressesRepository(pair)
 
-	receiverAddresses, err := repo.GetAll()
+	repoAddresses, err := repo.GetAll()
 	if err != nil {
 		return err
 	}
 
-	return service.sender.SendEmails(*email, receiverAddresses)
+	return service.sender.SendEmails(*email, repoAddresses)
 }
 
 func getEmailWithRate(rate *models.ExchangeRate) *models.EmailMessage {

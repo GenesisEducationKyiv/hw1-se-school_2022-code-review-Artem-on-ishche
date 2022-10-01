@@ -17,8 +17,10 @@ type EmailAddressesRepository interface {
 	IsSaved(emailAddress models.EmailAddress) (bool, error)
 	Add(emailAddress models.EmailAddress) error
 	GetAll() ([]models.EmailAddress, error)
+	AssociatedCurrencyPair() *models.CurrencyPair
 }
 
 type EmailAddressesRepositoryGetter interface {
-	GetEmailAddressesRepository(currencyPair *models.CurrencyPair) EmailAddressesRepository
+	GetEmailAddressesRepositories(currencyPair *models.CurrencyPair) []EmailAddressesRepository
+	GetAllEmailAddressesRepositories() []EmailAddressesRepository
 }

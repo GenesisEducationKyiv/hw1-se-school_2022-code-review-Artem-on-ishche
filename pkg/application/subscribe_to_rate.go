@@ -18,7 +18,7 @@ func NewSubscribeToRateServiceImpl(repoGetter services.EmailAddressesRepositoryG
 }
 
 func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error {
-	repository := s.repoGetter.GetEmailAddressesRepository(currencyPair)
+	repository := s.repoGetter.GetEmailAddressesRepositories(currencyPair)[0]
 
 	isEmailSaved, err := repository.IsSaved(*emailAddress)
 	if err != nil {
