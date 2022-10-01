@@ -1,6 +1,7 @@
 package rates
 
 import (
+	"gses2.app/api/pkg/application"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func testThatGetExchangeRateReturnsErrorForUnsupportedCurrencies(t *testing.T, s
 	_, err := service.GetExchangeRate(currencyPair)
 
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, services.ErrAPIRequestUnsuccessful)
+	assert.ErrorIs(t, err, application.ErrAPIRequestUnsuccessful)
 }
 
 func testThatGetExchangeRateReturnsNilForUnsupportedCurrencies(t *testing.T, service services.ExchangeRateService) {

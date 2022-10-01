@@ -2,7 +2,7 @@ package application
 
 import "gses2.app/api/pkg/domain/models"
 
-var pair = models.CurrencyPair{
+var btcUahPair = models.CurrencyPair{
 	Base:  models.Currency{Name: "BTC"},
 	Quote: models.Currency{Name: "UAH"},
 }

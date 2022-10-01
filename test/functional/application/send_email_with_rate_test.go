@@ -8,7 +8,6 @@ import (
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
 
 func TestSendRateEmails_WithSpy_CallsEmailSender(t *testing.T) {
@@ -18,7 +17,7 @@ func TestSendRateEmails_WithSpy_CallsEmailSender(t *testing.T) {
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
 	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
 
-	_ = sendEmailsServiceImpl.SendRateEmails(&pair, key)
+	_ = sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
 	assert.Equal(t, 1, sendEmailsCallCount)
 }
@@ -32,7 +31,7 @@ func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
 	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
 
-	_ = sendEmailsServiceImpl.SendRateEmails(&pair, key)
+	_ = sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
 	assert.Contains(t, emailBodyInTest, fmt.Sprintf("%v", rate))
 }
@@ -45,7 +44,7 @@ func TestThatEmailHasCorrectReceivers(t *testing.T) {
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations(receiverAddresses)
 	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
 
-	_ = sendEmailsServiceImpl.SendRateEmails(&pair, key)
+	_ = sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
 	assert.Equal(t, receiverAddresses, actualReceiverAddresses)
 }
@@ -57,22 +56,22 @@ func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
 	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
 
-	err := sendEmailsServiceImpl.SendRateEmails(&pair, key)
+	err := sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
 	assert.Nil(t, err)
 }
 
 func TestThatEmailSenderHandlesApiErrors(t *testing.T) {
-	setGetRateFunctionToReturnError(services.ErrAPIRequestUnsuccessful)
+	setGetRateFunctionToReturnError(application.ErrAPIRequestUnsuccessful)
 	setSendEmailsTestFunctionToReturnError()
 
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
 	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
 
-	err := sendEmailsServiceImpl.SendRateEmails(&pair, key)
+	err := sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, services.ErrAPIRequestUnsuccessful, err)
+	assert.Equal(t, application.ErrAPIRequestUnsuccessful, err)
 }
 
 func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
@@ -82,8 +81,8 @@ func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
 	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
 
-	err := sendEmailsServiceImpl.SendRateEmails(&pair, key)
+	err := sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
 	assert.NotNil(t, err)
-	assert.NotEqual(t, services.ErrAPIRequestUnsuccessful, err)
+	assert.NotEqual(t, application.ErrAPIRequestUnsuccessful, err)
 }

@@ -36,6 +36,10 @@ func (repository *inMemoryEmailAddressesRepository) GetAll() ([]models.EmailAddr
 	return repository.emailAddresses, nil
 }
 
+func (repository *inMemoryEmailAddressesRepository) AssociatedCurrencyPair() *models.CurrencyPair {
+	return &btcUahPair
+}
+
 type inMemoryEmailAddressesRepositoryGetter struct {
 	repo inMemoryEmailAddressesRepository
 }
@@ -44,8 +48,22 @@ func newInMemoryEmailAddressesRepositoryGetter(repo inMemoryEmailAddressesReposi
 	return &inMemoryEmailAddressesRepositoryGetter{repo: repo}
 }
 
-func (g inMemoryEmailAddressesRepositoryGetter) GetEmailAddressesRepository(*models.CurrencyPair) services.EmailAddressesRepository {
-	return &g.repo
+func (g inMemoryEmailAddressesRepositoryGetter) GetEmailAddressesRepositories(currencyPair *models.CurrencyPair) []services.EmailAddressesRepository {
+	repos := make([]services.EmailAddressesRepository, 0)
+	if *currencyPair == btcUahPair {
+		return repos
+	}
+
+	repos = append(repos, &g.repo)
+
+	return repos
+}
+
+func (g inMemoryEmailAddressesRepositoryGetter) GetAllEmailAddressesRepositories() []services.EmailAddressesRepository {
+	repos := make([]services.EmailAddressesRepository, 0)
+	repos = append(repos, &g.repo)
+
+	return repos
 }
 
 func getSubscribeService(addresses []models.EmailAddress) application.RateSubscriptionService {

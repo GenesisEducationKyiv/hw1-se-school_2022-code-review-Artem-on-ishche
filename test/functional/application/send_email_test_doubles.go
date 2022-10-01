@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	"time"
 
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
@@ -41,7 +42,7 @@ func getRateServiceRepoGetterAndSenderImplementations(receiverAddresses []models
 
 func setGetRateWithoutErrorFunctionToReturnRateWithPrice(price float64) {
 	getRateTestFunction = func(pair models.CurrencyPair) (*models.ExchangeRate, error) {
-		return models.NewExchangeRate(pair, price), nil
+		return models.NewExchangeRate(pair, price, time.Now()), nil
 	}
 }
 
