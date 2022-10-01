@@ -9,6 +9,8 @@ import (
 	"gses2.app/api/pkg/domain/services"
 )
 
+const timeLayout = "2006-01-02T15:04:05.999Z"
+
 type RateServiceFactory interface {
 	CreateRateService() ExchangeRateServiceChain
 }

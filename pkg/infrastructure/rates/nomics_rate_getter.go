@@ -70,7 +70,7 @@ func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse
 		return nil, services.ErrAPIRequestUnsuccessful
 	}
 
-	timestamp, err := time.Parse("2006-01-02T15:04:05Z", result.PriceTimestamp)
+	timestamp, err := time.Parse(timeLayout, result.PriceTimestamp)
 	if err != nil {
 		return nil, services.ErrAPIResponseUnmarshallError
 	}
