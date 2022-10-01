@@ -13,7 +13,7 @@ type CacherRateServiceFactory struct {
 func (factory CacherRateServiceFactory) CreateRateService() CacherRateService {
 	return &inMemoryCacher{
 		maximumCacheTimeInMinutes: factory.MaxTime,
-		cachedResponses:           make(map[models.CurrencyPair]parsedResponse),
+		cachedResponses:           make(map[string]parsedResponse),
 	}
 }
 
@@ -26,7 +26,7 @@ type CacherRateService interface {
 type inMemoryCacher struct {
 	next                      *ExchangeRateServiceChain
 	maximumCacheTimeInMinutes float64
-	cachedResponses           map[models.CurrencyPair]parsedResponse
+	cachedResponses           map[string]parsedResponse
 }
 
 func (cacher *inMemoryCacher) SetNext(service *ExchangeRateServiceChain) {
@@ -34,7 +34,7 @@ func (cacher *inMemoryCacher) SetNext(service *ExchangeRateServiceChain) {
 }
 
 func (cacher *inMemoryCacher) GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
-	response, ok := cacher.cachedResponses[pair]
+	response, ok := cacher.cachedResponses[pair.String()]
 	if !ok {
 		return (*cacher.next).GetExchangeRate(pair)
 	}
@@ -43,11 +43,11 @@ func (cacher *inMemoryCacher) GetExchangeRate(pair models.CurrencyPair) (*models
 		return (*cacher.next).GetExchangeRate(pair)
 	}
 
-	return models.NewExchangeRate(pair, response.price), nil
+	return models.NewExchangeRate(pair, response.price, response.time), nil
 }
 
 func (cacher *inMemoryCacher) Update(pair *models.CurrencyPair, response *parsedResponse) {
-	cacher.cachedResponses[*pair] = *response
+	cacher.cachedResponses[(*pair).String()] = *response
 }
 
 func (cacher *inMemoryCacher) isCachedResponseOutdated(response parsedResponse) bool {

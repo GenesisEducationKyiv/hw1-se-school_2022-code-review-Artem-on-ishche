@@ -58,7 +58,7 @@ func (service *sendRateEmailsServiceImpl) SendRateEmails(pair *models.CurrencyPa
 
 func getEmailWithRate(rate *models.ExchangeRate) *models.EmailMessage {
 	title := fmt.Sprintf("%s exchange rate", rate.String())
-	body := fmt.Sprintf("Currently 1 %s costs %v %s", rate.CurrencyPair.Base, rate.Price, rate.CurrencyPair.Quote)
+	body := fmt.Sprintf("At the time of %s, 1 %s costs %v %s", rate.Timestamp.String(), rate.CurrencyPair.Base, rate.Price, rate.CurrencyPair.Quote)
 
 	return models.NewEmail(title, body)
 }

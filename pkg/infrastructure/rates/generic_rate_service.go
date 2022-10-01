@@ -57,7 +57,7 @@ func (service *exchangeRateService) getExchangeRate(pair models.CurrencyPair) (*
 	service.notifyMediatorAboutSuccessAPIResponseReceived(pair, parsedResponse)
 	service.notifyMediatorAboutNewRateReturned(&pair, parsedResponse)
 
-	return models.NewExchangeRate(pair, parsedResponse.price), nil
+	return models.NewExchangeRate(pair, parsedResponse.price, parsedResponse.time), nil
 }
 
 func (service *exchangeRateService) makeAPIRequest(pair models.CurrencyPair) (*resty.Response, error) {
