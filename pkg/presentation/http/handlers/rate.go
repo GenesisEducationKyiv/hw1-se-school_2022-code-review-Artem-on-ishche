@@ -1,12 +1,12 @@
-package http
+package handlers
 
 import (
 	"errors"
-	"gses2.app/api/pkg/application"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -25,21 +25,11 @@ type RateRequestHandler struct {
 	ExchangeRateService services.ExchangeRateService
 }
 
-func (handler RateRequestHandler) GetPath() string {
-	return "/rate"
-}
-
-func (handler RateRequestHandler) GetMethod() string {
-	return "GET"
-}
-
-func (handler RateRequestHandler) HandleRequest(ctx *gin.Context) {
+func (handler *RateRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params rateRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
-		ctx.JSON(http.StatusBadRequest, "Input parameters are wrong")
-
-		return
+		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
 
 	handleEmptyParameter(&params.Base, defaultBaseName)
@@ -49,13 +39,13 @@ func (handler RateRequestHandler) HandleRequest(ctx *gin.Context) {
 
 	exchangeRate, err := handler.ExchangeRateService.GetExchangeRate(*pair)
 	if errors.Is(err, nil) {
-		ctx.JSON(http.StatusOK, exchangeRate.Price)
+		return NewJSONResponse(http.StatusOK, exchangeRate.Price)
 	} else if errors.Is(err, application.ErrAPIRequestUnsuccessful) {
-		ctx.JSON(http.StatusBadGateway, "API request has not been successful")
+		return NewJSONResponse(http.StatusBadGateway, "API request has not been successful")
 	} else if errors.Is(err, application.ErrAPIResponseUnmarshallError) {
-		ctx.JSON(http.StatusBadGateway, "API returned unexpected response")
+		return NewJSONResponse(http.StatusBadGateway, "API returned unexpected response")
 	} else {
-		ctx.JSON(http.StatusInternalServerError, "Some unexpected error has occurred")
+		return NewJSONResponse(http.StatusInternalServerError, "Some unexpected error has occurred")
 	}
 }
 

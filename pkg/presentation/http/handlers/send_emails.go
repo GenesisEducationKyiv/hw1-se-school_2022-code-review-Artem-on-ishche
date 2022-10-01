@@ -1,4 +1,4 @@
-package http
+package handlers
 
 import (
 	"errors"
@@ -19,21 +19,11 @@ type SendEmailsRequestHandler struct {
 	SendRateEmailsService application.SendRateEmailsService
 }
 
-func (handler SendEmailsRequestHandler) GetPath() string {
-	return "/sendEmails"
-}
-
-func (handler SendEmailsRequestHandler) GetMethod() string {
-	return "POST"
-}
-
-func (handler SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) {
+func (handler *SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params sendEmailsRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
-		ctx.JSON(http.StatusBadRequest, "Input parameters are wrong")
-
-		return
+		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
 
 	key := params.Key
@@ -41,12 +31,12 @@ func (handler SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) {
 
 	err := handler.SendRateEmailsService.SendRateEmails(pair, key)
 	if errors.Is(err, nil) {
-		ctx.JSON(http.StatusOK, "Success")
+		return NewJSONResponse(http.StatusOK, "Success")
 	} else if errors.Is(err, application.ErrValidationError) {
-		ctx.JSON(http.StatusUnauthorized, "Provided key is not valid")
+		return NewJSONResponse(http.StatusUnauthorized, "Provided key is not valid")
 	} else if errors.Is(err, application.ErrAPIRequestUnsuccessful) {
-		ctx.JSON(http.StatusBadGateway, "API request has not been successful")
+		return NewJSONResponse(http.StatusBadGateway, "API request has not been successful")
 	} else {
-		ctx.JSON(http.StatusInternalServerError, "Some error has occurred")
+		return NewJSONResponse(http.StatusInternalServerError, "Some error has occurred")
 	}
 }

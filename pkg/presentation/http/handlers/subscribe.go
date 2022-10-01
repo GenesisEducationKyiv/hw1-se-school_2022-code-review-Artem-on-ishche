@@ -1,4 +1,4 @@
-package http
+package handlers
 
 import (
 	"net/http"
@@ -19,39 +19,27 @@ type SubscribeRequestHandler struct {
 	RateSubscriptionService application.RateSubscriptionService
 }
 
-func (handler SubscribeRequestHandler) GetPath() string {
-	return "/subscribe"
-}
-
-func (handler SubscribeRequestHandler) GetMethod() string {
-	return "POST"
-}
-
-func (handler SubscribeRequestHandler) HandleRequest(ctx *gin.Context) {
+func (handler SubscribeRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params subscribeRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
-		ctx.JSON(http.StatusBadRequest, "Input parameters are wrong")
-
-		return
+		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
 
 	emailAddress, err := models.NewEmailAddress(params.EmailAddrString)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, "Provided email address is wrong")
-
-		return
+		return NewJSONResponse(http.StatusBadRequest, "Provided email address is wrong")
 	}
 
 	pair := getCurrencyPair(params.Base, params.Quote)
 
 	err = handler.RateSubscriptionService.Subscribe(emailAddress, pair)
 	if err == nil {
-		ctx.JSON(http.StatusOK, "Success")
+		return NewJSONResponse(http.StatusOK, "Success")
 	} else if isEmailAlreadySaved(err, emailAddress.String()) {
-		ctx.JSON(http.StatusConflict, "This email address is already saved")
+		return NewJSONResponse(http.StatusConflict, "This email address is already saved")
 	} else {
-		ctx.JSON(http.StatusInternalServerError, "Error when saving the email address")
+		return NewJSONResponse(http.StatusInternalServerError, "Error when saving the email address")
 	}
 }
 

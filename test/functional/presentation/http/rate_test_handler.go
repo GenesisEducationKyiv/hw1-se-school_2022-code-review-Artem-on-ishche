@@ -2,7 +2,7 @@ package http
 
 import (
 	"gses2.app/api/pkg/domain/models"
-	httpPresentation "gses2.app/api/pkg/presentation/http"
+	httpPresentation "gses2.app/api/pkg/presentation/http/routes"
 )
 
 type getRateFunction func() (*models.ExchangeRate, error)
@@ -15,4 +15,4 @@ func (service rateServiceTestDouble) GetExchangeRate(models.CurrencyPair) (*mode
 	return getRateTestFunction()
 }
 
-var testBtcToUahHandler = httpPresentation.RateRequestHandler{ExchangeRateService: rateServiceTestDouble{}}
+var testBtcToUahHandler = httpPresentation.RateRoute{ExchangeRateService: rateServiceTestDouble{}}

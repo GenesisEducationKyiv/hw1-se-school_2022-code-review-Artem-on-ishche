@@ -2,7 +2,7 @@ package http
 
 import (
 	"gses2.app/api/pkg/domain/models"
-	httpPresentation "gses2.app/api/pkg/presentation/http"
+	httpPresentation "gses2.app/api/pkg/presentation/http/routes"
 )
 
 type addEmailAddressFunction func(emailAddress models.EmailAddress) error
