@@ -12,7 +12,7 @@ COPY *.go ./
 COPY .env  ./
 
 RUN mkdir data
-COPY data/*.go ./data/
+COPY crypto-app/data/*.go ./data/
 
 RUN mkdir emails
 COPY emails/*.go ./emails/
@@ -21,7 +21,7 @@ RUN mkdir rates
 COPY rates/*.go ./rates/
 
 RUN mkdir smtp
-COPY pkg/implementations/email/smtp/*.go ./smtp/
+COPY crypto-app/pkg/implementations/email/smtp/*.go ./smtp/
 
 RUN go build -o /gses2.app/api
 

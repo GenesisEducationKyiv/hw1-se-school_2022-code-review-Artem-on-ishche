@@ -9,10 +9,9 @@ import (
 )
 
 var (
-	CoinAPIKeyValue          string
-	NomicsAPIKeyValue        string
-	CoinMarketCapAPIKeyValue string
-	MailSlurpAPIKeyValue     string
+	CoinAPIKeyValue      string
+	NomicsAPIKeyValue    string
+	MailSlurpAPIKeyValue string
 
 	EmailAddress  string
 	EmailPassword string
@@ -28,7 +27,7 @@ func LoadEnv() {
 }
 
 func loadFile() {
-	projectDirName := "btc_application"
+	projectDirName := "crypto-app"
 	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
 	currentWorkDirectory, _ := os.Getwd()
 	rootPath := projectName.Find([]byte(currentWorkDirectory))
@@ -42,7 +41,6 @@ func loadFile() {
 func loadVariables() {
 	CoinAPIKeyValue = os.Getenv("COIN_API_KEY")
 	NomicsAPIKeyValue = os.Getenv("NOMICS_API_KEY")
-	CoinMarketCapAPIKeyValue = os.Getenv("COIN_MARKETCAP_API_KEY")
 	MailSlurpAPIKeyValue = os.Getenv("MAILSLURP_API_KEY")
 
 	EmailAddress = os.Getenv("EMAIL_ADDRESS")
