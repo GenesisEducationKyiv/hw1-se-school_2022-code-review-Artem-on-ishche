@@ -12,7 +12,7 @@ type ExchangeRate struct {
 }
 
 func (rate *ExchangeRate) String() string {
-	return fmt.Sprintf("%s rate is %v", rate.CurrencyPair.String(), rate.Price)
+	return fmt.Sprintf("%s rate is %v at %v", rate.CurrencyPair.String(), rate.Price, rate.Timestamp)
 }
 
 func NewExchangeRate(pair CurrencyPair, price float64, timestamp time.Time) *ExchangeRate {

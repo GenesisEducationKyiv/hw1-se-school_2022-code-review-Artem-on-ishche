@@ -1,5 +1,7 @@
 package services
 
 type Logger interface {
-	Log(text string)
+	Debug(text string)
+	Info(text string)
+	Error(text string)
 }

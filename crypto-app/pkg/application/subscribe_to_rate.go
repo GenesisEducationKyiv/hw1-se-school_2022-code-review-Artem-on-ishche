@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -11,23 +12,36 @@ type RateSubscriptionService interface {
 
 type rateSubscriptionServiceImpl struct {
 	repoGetter services.EmailAddressesRepositoryGetter
+	logger     services.Logger
 }
 
-func NewSubscribeToRateServiceImpl(repoGetter services.EmailAddressesRepositoryGetter) *rateSubscriptionServiceImpl {
-	return &rateSubscriptionServiceImpl{repoGetter: repoGetter}
+func NewSubscribeToRateServiceImpl(
+	repoGetter services.EmailAddressesRepositoryGetter,
+	logger services.Logger,
+) *rateSubscriptionServiceImpl {
+	return &rateSubscriptionServiceImpl{repoGetter: repoGetter, logger: logger}
 }
 
 func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error {
+	s.logger.Debug(fmt.Sprintf("Subscribe() called with emailAddress=%s, currencyPair=%s",
+		emailAddress.String(), currencyPair.String()))
+
 	repository := s.repoGetter.GetEmailAddressesRepositories(currencyPair)[0]
+	s.logger.Debug(fmt.Sprintf(
+		"repoGetter.GetEmailAddressesRepositories() returned a repository with associated currency pair = {%s}",
+		repository.AssociatedCurrencyPair().String()))
 
 	isEmailSaved, err := repository.IsSaved(*emailAddress)
+	s.logger.Debug(fmt.Sprintf("repository.IsSaved() returned isEmailSaved=%v, err=%s", isEmailSaved, err.Error()))
+
 	if err != nil {
 		return err
-	}
-
-	if isEmailSaved {
+	} else if isEmailSaved {
 		return ErrEmailAddressAlreadyExists(emailAddress.String())
 	}
 
-	return repository.Add(*emailAddress)
+	err = repository.Add(*emailAddress)
+	s.logger.Debug(fmt.Sprintf("repository.Add() returned err={%s}", err.Error()))
+
+	return nil
 }

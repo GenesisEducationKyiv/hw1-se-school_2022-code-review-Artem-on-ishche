@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -14,7 +15,8 @@ const (
 )
 
 type EmailAddressesFileRepoGetter struct {
-	repos map[string]services.EmailAddressesRepository
+	repos  map[string]services.EmailAddressesRepository
+	logger services.Logger
 }
 
 func NewEmailAddressesFileRepoGetter() *EmailAddressesFileRepoGetter {
@@ -26,6 +28,8 @@ func NewEmailAddressesFileRepoGetter() *EmailAddressesFileRepoGetter {
 func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepositories(
 	currencyPair *models.CurrencyPair,
 ) []services.EmailAddressesRepository {
+	getter.logger.Debug("GetEmailAddressesRepositories() called with currencyPair = " + currencyPair.String())
+
 	getter.loadAllRepos()
 
 	filteredRepos := make([]services.EmailAddressesRepository, 0)
@@ -40,9 +44,13 @@ func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepositories(
 		}
 	}
 
+	getter.logger.Debug(fmt.Sprintf("fileteredRepos after filtering: %v", filteredRepos))
+
 	if len(filteredRepos) != 0 {
 		return filteredRepos
 	}
+
+	getter.logger.Debug("No repo left after filtering, so create a new one for this pair")
 
 	pairString := currencyPair.String()
 	repo := NewEmailAddressesFileRepository(dirName, pairString+fileExtension)
@@ -54,6 +62,8 @@ func (getter EmailAddressesFileRepoGetter) GetEmailAddressesRepositories(
 }
 
 func (getter EmailAddressesFileRepoGetter) GetAllEmailAddressesRepositories() []services.EmailAddressesRepository {
+	getter.logger.Debug("GetAllEmailAddressesRepositories() called")
+
 	getter.loadAllRepos()
 
 	repos := make([]services.EmailAddressesRepository, 0)
@@ -66,7 +76,9 @@ func (getter EmailAddressesFileRepoGetter) GetAllEmailAddressesRepositories() []
 }
 
 func (getter EmailAddressesFileRepoGetter) loadAllRepos() {
-	files, err := readOrCreateDir()
+	getter.logger.Debug("loadAllRepos() called")
+
+	files, err := getter.readOrCreateDir()
 	if err != nil || len(getter.repos) >= len(files) {
 		return
 	}
@@ -80,10 +92,12 @@ func (getter EmailAddressesFileRepoGetter) loadAllRepos() {
 	}
 }
 
-func readOrCreateDir() ([]os.DirEntry, error) {
+func (getter EmailAddressesFileRepoGetter) readOrCreateDir() ([]os.DirEntry, error) {
 	files, err := os.ReadDir(dirName)
 	if err != nil {
-		err = os.Mkdir(dirName, os.ModePerm)
+		getter.logger.Error("storage directory does not yet exist")
+
+		_ = os.Mkdir(dirName, os.ModePerm)
 	}
 
 	return files, err

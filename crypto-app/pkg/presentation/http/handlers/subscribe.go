@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/pkg/domain/services"
 )
 
 type subscribeRequestParameters struct {
@@ -17,23 +19,30 @@ type subscribeRequestParameters struct {
 
 type SubscribeRequestHandler struct {
 	RateSubscriptionService application.RateSubscriptionService
+	logger                  services.Logger
 }
 
 func (handler SubscribeRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params subscribeRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
+		handler.logger.Error("Input parameters to /subscribe are wrong")
+
 		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
 
 	emailAddress, err := models.NewEmailAddress(params.EmailAddrString)
 	if err != nil {
-		return NewJSONResponse(http.StatusBadRequest, "Provided email address is wrong")
+		handler.logger.Error("Email parameter to /subscribe is invalid: " + params.EmailAddrString)
+
+		return NewJSONResponse(http.StatusBadRequest, "Provided email address is invalid")
 	}
 
 	pair := getCurrencyPair(params.Base, params.Quote)
 
 	err = handler.RateSubscriptionService.Subscribe(emailAddress, pair)
+	handler.logger.Debug(fmt.Sprintf("SendRateEmails() returned err=%s", err.Error()))
+
 	if err == nil {
 		return NewJSONResponse(http.StatusOK, "Success")
 	} else if isEmailAlreadySaved(err, emailAddress.String()) {
