@@ -30,12 +30,12 @@ func LoadEnv(loggerService services.Logger) {
 func loadFile(loggerService services.Logger) {
 	loggerService.Info("Loading .env file")
 
-	projectDirName := "crypto-app"
+	projectDirName := "btc_application"
 	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
 	currentWorkDirectory, _ := os.Getwd()
 	rootPath := projectName.Find([]byte(currentWorkDirectory))
 
-	err := godotenv.Load(string(rootPath) + `/.env`)
+	err := godotenv.Load(string(rootPath) + `/crypto-app/.env`)
 	if err != nil {
 		loggerService.Error("Error loading .env file")
 	}
