@@ -15,7 +15,6 @@ func InitServices(loggerService services.Logger) (
 	application.SendRateEmailsService,
 	services.Logger,
 ) {
-
 	genericExchangeRateService := GetGenericExchangeRateService(loggerService)
 	repositoryGetter := repos.NewEmailAddressesFileRepoGetter(loggerService)
 	emailSender := email.GetEmailClient(loggerService)

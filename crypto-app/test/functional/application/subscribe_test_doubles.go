@@ -4,6 +4,7 @@ import (
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
+	"gses2.app/api/test/functional/publicmocks"
 )
 
 var key = "key"
@@ -71,7 +72,7 @@ func (g inMemoryEmailAddressesRepositoryGetter) GetAllEmailAddressesRepositories
 func getSubscribeService(addresses []models.EmailAddress) application.RateSubscriptionService {
 	storage := newInMemoryEmailAddressesStorage(addresses)
 	repoGetter := newInMemoryEmailAddressesRepositoryGetter(storage)
-	subscribeServiceImpl := application.NewSubscribeToRateServiceImpl(repoGetter)
+	subscribeServiceImpl := application.NewSubscribeToRateServiceImpl(repoGetter, publicmocks.EmptyLogger)
 
 	return subscribeServiceImpl
 }

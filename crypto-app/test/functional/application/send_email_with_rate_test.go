@@ -8,6 +8,7 @@ import (
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/test/functional/publicmocks"
 )
 
 func TestSendRateEmails_WithSpy_CallsEmailSender(t *testing.T) {
@@ -15,7 +16,7 @@ func TestSendRateEmails_WithSpy_CallsEmailSender(t *testing.T) {
 	setSendEmailsTestFunctionToCountCalls()
 
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
-	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
+	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender, publicmocks.EmptyLogger)
 
 	_ = sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
@@ -29,7 +30,7 @@ func TestThatEmailBodyContainsBtcToUahRate(t *testing.T) {
 	setSendEmailsTestFunctionToSaveEmailBody()
 
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
-	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
+	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender, publicmocks.EmptyLogger)
 
 	_ = sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
@@ -42,7 +43,7 @@ func TestThatEmailHasCorrectReceivers(t *testing.T) {
 
 	receiverAddresses := getReceiverAddressesForEmailReceiversTest()
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations(receiverAddresses)
-	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
+	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender, publicmocks.EmptyLogger)
 
 	_ = sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
@@ -54,7 +55,7 @@ func TestThatEmailSenderDoesNotReturnErrorWhenEverythingIsSuccessful(t *testing.
 	setSendEmailsTestFunctionToNotDoAnything()
 
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
-	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
+	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender, publicmocks.EmptyLogger)
 
 	err := sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
@@ -66,7 +67,7 @@ func TestThatEmailSenderHandlesApiErrors(t *testing.T) {
 	setSendEmailsTestFunctionToReturnError()
 
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
-	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
+	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender, publicmocks.EmptyLogger)
 
 	err := sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 
@@ -79,7 +80,7 @@ func TestThatEmailSenderHandlesEmailSendingErrors(t *testing.T) {
 	setSendEmailsTestFunctionToReturnError()
 
 	rateService, storage, sender := getRateServiceRepoGetterAndSenderImplementations([]models.EmailAddress{})
-	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender)
+	sendEmailsServiceImpl := application.NewSendRateEmailsServiceImpl(key, rateService, storage, sender, publicmocks.EmptyLogger)
 
 	err := sendEmailsServiceImpl.SendRateEmails(&btcUahPair, key)
 

@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -65,6 +66,7 @@ func (service *sendRateEmailsServiceImpl) sendEmailsForOneRepo(repo services.Ema
 
 	rate, err := service.rateService.GetExchangeRate(*repoPair)
 	service.logger.Debug(fmt.Sprintf("rateService.GetExchangeRate() returned rate={%s}, err={%v}", rate.String(), err))
+
 	if err != nil {
 		return err
 	}
@@ -73,6 +75,7 @@ func (service *sendRateEmailsServiceImpl) sendEmailsForOneRepo(repo services.Ema
 
 	repoAddresses, err := repo.GetAll()
 	service.logger.Debug(fmt.Sprintf("repo.GetAll() returned err={%v},\nrepoAddresses=%v", err, repoAddresses))
+
 	if err != nil {
 		return err
 	}

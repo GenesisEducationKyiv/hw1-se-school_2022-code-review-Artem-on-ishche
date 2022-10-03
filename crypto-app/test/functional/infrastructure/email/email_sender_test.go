@@ -11,6 +11,7 @@ import (
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
 	emailsImpl "gses2.app/api/pkg/infrastructure/email"
+	"gses2.app/api/test/functional/publicmocks"
 )
 
 func TestSendEmailsWithNoReceivers(t *testing.T) {
@@ -18,13 +19,13 @@ func TestSendEmailsWithNoReceivers(t *testing.T) {
 
 	var receiverAddresses []models.EmailAddress
 
-	err := emailsImpl.GetEmailClient().SendEmails(*email, receiverAddresses)
+	err := emailsImpl.GetEmailClient(publicmocks.EmptyLogger).SendEmails(*email, receiverAddresses)
 
 	assert.NoError(t, err)
 }
 
 func TestSendEmails(t *testing.T) {
-	config.LoadEnv()
+	config.LoadEnv(publicmocks.EmptyLogger)
 
 	client, ctx := createClientAndContext()
 	inbox, _, _ := client.InboxControllerApi.CreateInbox(ctx, nil)
@@ -32,7 +33,7 @@ func TestSendEmails(t *testing.T) {
 	emailToSend := models.NewEmail("title", "content")
 	receiverAddresses := []models.EmailAddress{*inboxAddress}
 
-	err := emailsImpl.GetEmailClient().SendEmails(*emailToSend, receiverAddresses)
+	err := emailsImpl.GetEmailClient(publicmocks.EmptyLogger).SendEmails(*emailToSend, receiverAddresses)
 
 	assert.NoError(t, err)
 	assertReceivedEmail(t, inbox, *client, ctx)

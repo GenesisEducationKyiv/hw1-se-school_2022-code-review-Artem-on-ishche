@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"gses2.app/api/pkg"
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/infrastructure/logger"
@@ -14,5 +12,9 @@ func main() {
 	defer loggerService.Close()
 
 	config.LoadEnv(loggerService)
-	log.Fatal(routes.SetupRouter(pkg.InitServices(loggerService)).Run(config.NetworkPort))
+
+	err := routes.SetupRouter(pkg.InitServices(loggerService)).Run(config.NetworkPort)
+	if err != nil {
+		loggerService.Error("Router Error")
+	}
 }
