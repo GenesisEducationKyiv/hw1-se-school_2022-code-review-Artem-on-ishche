@@ -5,41 +5,40 @@ import (
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/services"
 	"gses2.app/api/pkg/infrastructure/email"
-	"gses2.app/api/pkg/infrastructure/logger"
 	"gses2.app/api/pkg/infrastructure/rates"
 	"gses2.app/api/pkg/infrastructure/repos"
 )
 
-func InitServices() (
+func InitServices(loggerService services.Logger) (
 	services.ExchangeRateService,
 	application.RateSubscriptionService,
 	application.SendRateEmailsService,
+	services.Logger,
 ) {
-	genericExchangeRateService := GetGenericExchangeRateService()
-	repositoryGetter := repos.NewEmailAddressesFileRepoGetter()
-	emailSender := email.GetEmailClient()
 
-	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter)
+	genericExchangeRateService := GetGenericExchangeRateService(loggerService)
+	repositoryGetter := repos.NewEmailAddressesFileRepoGetter(loggerService)
+	emailSender := email.GetEmailClient(loggerService)
+
+	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter, loggerService)
 	sendBtcToUahRateEmailsService := application.NewSendRateEmailsServiceImpl(
 		config.AdminKey,
 		genericExchangeRateService,
 		repositoryGetter,
 		emailSender,
+		loggerService,
 	)
 
-	return genericExchangeRateService, subscribeToRateService, sendBtcToUahRateEmailsService
+	return genericExchangeRateService, subscribeToRateService, sendBtcToUahRateEmailsService, loggerService
 }
 
-func GetGenericExchangeRateService() services.ExchangeRateService {
+func GetGenericExchangeRateService(loggerService services.Logger) services.ExchangeRateService {
 	fiveMinutes := 5.0
-	cacherRateService := rates.CacherRateServiceFactory{MaxTime: fiveMinutes}.CreateRateService()
-	loggerService := logger.ConsoleLogger{}
+	cacherRateService := rates.CacherRateServiceFactory{MaxTime: fiveMinutes, Logger: loggerService}.CreateRateService()
 
-	mediator := getMediator(cacherRateService, loggerService)
-
-	coinRateService := rates.CoinAPIClientFactory{Mediator: mediator}.CreateRateService()
-	nomicsRateService := rates.NomicsAPIClientFactory{Mediator: mediator}.CreateRateService()
-	binanceRateService := rates.BinanceAPIClientFactory{Mediator: mediator}.CreateRateService()
+	coinRateService := rates.CoinAPIClientFactory{Cacher: cacherRateService, Logger: loggerService}.CreateRateService()
+	nomicsRateService := rates.NomicsAPIClientFactory{Cacher: cacherRateService, Logger: loggerService}.CreateRateService()
+	binanceRateService := rates.BinanceAPIClientFactory{Cacher: cacherRateService, Logger: loggerService}.CreateRateService()
 
 	switch config.CryptoCurrencyProvider {
 	case "coin":
@@ -63,25 +62,4 @@ func GetGenericExchangeRateService() services.ExchangeRateService {
 	default:
 		panic("Wrong crypto provider .env value")
 	}
-}
-
-func getMediator(cacherRateService rates.CacherRateService, loggerService services.Logger) *rates.Mediator {
-	mediator := rates.NewMediator()
-
-	err := mediator.Attach(rates.NewRateReturnedObserver{Cacher: cacherRateService}, rates.NewRateReturnedEvent{}.GetName())
-	if err != nil {
-		return nil
-	}
-
-	err = mediator.Attach(rates.FailureAPIResponseReceivedObserver{Logger: loggerService}, rates.FailureAPIResponseReceivedEvent{}.GetName())
-	if err != nil {
-		return nil
-	}
-
-	err = mediator.Attach(rates.SuccessAPIResponseReceivedObserver{Logger: loggerService}, rates.SuccessAPIResponseReceivedEvent{}.GetName())
-	if err != nil {
-		return nil
-	}
-
-	return &mediator
 }

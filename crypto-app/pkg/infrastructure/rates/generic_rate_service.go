@@ -1,12 +1,14 @@
 package rates
 
 import (
+	"fmt"
 	"net/http"
 
 	"gopkg.in/resty.v0"
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/pkg/domain/services"
 )
 
 const timeLayout = "2006-01-02T15:04:05.999Z"
@@ -21,9 +23,11 @@ type ExchangeRateServiceChain interface {
 }
 
 type exchangeRateService struct {
-	mediator           *Mediator
 	concreteRateClient exchangeRateAPIClient
 	next               *ExchangeRateServiceChain
+	cacher             CacherRateService
+
+	logger services.Logger
 }
 
 func (service *exchangeRateService) SetNext(nextService *ExchangeRateServiceChain) {
@@ -31,8 +35,13 @@ func (service *exchangeRateService) SetNext(nextService *ExchangeRateServiceChai
 }
 
 func (service *exchangeRateService) GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+	service.logger.Debug(fmt.Sprintf("GetExchangeRate() called on %s rate service with pair = %s",
+		service.concreteRateClient.name(), pair.String()))
+
 	rate, err := service.getExchangeRate(pair)
 	if err != nil && service.next != nil {
+		service.logger.Debug("Calling GetExchangeRate() on the next client in chain")
+
 		return (*service.next).GetExchangeRate(pair)
 	}
 
@@ -40,24 +49,30 @@ func (service *exchangeRateService) GetExchangeRate(pair models.CurrencyPair) (*
 }
 
 func (service *exchangeRateService) getExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
+	service.logger.Debug("Trying to get the exchange rate from " + service.concreteRateClient.name())
+
 	resp, err := service.makeAPIRequest(pair)
 	if err != nil {
+		service.logger.Error("API request failed")
+
 		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		service.notifyMediatorAboutFailureAPIResponseReceived(pair, resp)
+		service.logUnsuccessfulAPIResponse(&pair, resp.StatusCode())
 
 		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	parsedResponse, err := service.concreteRateClient.parseResponseBody(resp.Body)
 	if err != nil {
+		service.logger.Error("API returned a success code but I failed to parse the response")
+
 		return nil, err
 	}
 
-	service.notifyMediatorAboutSuccessAPIResponseReceived(pair, parsedResponse)
-	service.notifyMediatorAboutNewRateReturned(&pair, parsedResponse)
+	service.logSuccessfulAPIResponse(&pair, parsedResponse)
+	service.cacher.Update(&pair, parsedResponse)
 
 	return models.NewExchangeRate(pair, parsedResponse.price, parsedResponse.time), nil
 }
@@ -69,25 +84,23 @@ func (service *exchangeRateService) makeAPIRequest(pair models.CurrencyPair) (*r
 	return request.Get(url)
 }
 
-func (service *exchangeRateService) notifyMediatorAboutFailureAPIResponseReceived(pair models.CurrencyPair, response *resty.Response) {
-	(*service.mediator).Notify(FailureAPIResponseReceivedEvent{failureAPIResponseReceivedEventData{
-		pair:       &pair,
-		provider:   service.concreteRateClient.name(),
-		statusCode: response.StatusCode(),
-	}})
+func (service *exchangeRateService) logUnsuccessfulAPIResponse(pair *models.CurrencyPair, statusCode int) {
+	service.logger.Error(fmt.Sprintf(
+		`
+%s:
+  requested rate - %s
+  response - {status code: %v}`,
+		service.concreteRateClient.name(), pair.String(), statusCode))
 }
 
-func (service *exchangeRateService) notifyMediatorAboutSuccessAPIResponseReceived(pair models.CurrencyPair, response *parsedResponse) {
-	(*service.mediator).Notify(SuccessAPIResponseReceivedEvent{successAPIResponseReceivedEventData{
-		pair:     &pair,
-		provider: service.concreteRateClient.name(),
-		response: response,
-	}})
-}
-
-func (service *exchangeRateService) notifyMediatorAboutNewRateReturned(pair *models.CurrencyPair, response *parsedResponse) {
-	(*service.mediator).Notify(NewRateReturnedEvent{newRateReturnedEventData{
-		pair:     pair,
-		response: response,
-	}})
+func (service *exchangeRateService) logSuccessfulAPIResponse(pair *models.CurrencyPair, resp *parsedResponse) {
+	service.logger.Debug(fmt.Sprintf(
+		`
+%s:
+  requested rate - %s
+  response - {
+    price: %v,
+    time: %v
+  }`,
+		service.concreteRateClient.name(), pair.String(), resp.price, resp.time))
 }

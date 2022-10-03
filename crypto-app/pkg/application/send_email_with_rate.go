@@ -38,7 +38,7 @@ func NewSendRateEmailsServiceImpl(
 }
 
 func (service *sendRateEmailsServiceImpl) SendRateEmails(passedPair *models.CurrencyPair, key string) error {
-	service.logger.Debug(fmt.Sprintf("SendRateEmails() called with passedPair=%s, key=%s", passedPair.String(), key))
+	service.logger.Debug(fmt.Sprintf("SendRateEmails() called with passedPair={%s}, key=%s", passedPair.String(), key))
 
 	if key != service.validationKey {
 		service.logger.Error(fmt.Sprintf("Provided validation key (%s) doesn't match the correct one (%s)", key, service.validationKey))
@@ -64,7 +64,7 @@ func (service *sendRateEmailsServiceImpl) sendEmailsForOneRepo(repo services.Ema
 	service.logger.Debug("Sending emails for a repo associated with" + repoPair.String())
 
 	rate, err := service.rateService.GetExchangeRate(*repoPair)
-	service.logger.Debug(fmt.Sprintf("rateService.GetExchangeRate() returned rate={%s}, err={%s}", rate.String(), err.Error()))
+	service.logger.Debug(fmt.Sprintf("rateService.GetExchangeRate() returned rate={%s}, err={%v}", rate.String(), err))
 	if err != nil {
 		return err
 	}
@@ -72,13 +72,13 @@ func (service *sendRateEmailsServiceImpl) sendEmailsForOneRepo(repo services.Ema
 	email := getEmailWithRate(rate)
 
 	repoAddresses, err := repo.GetAll()
-	service.logger.Debug(fmt.Sprintf("repo.GetAll() returned err={%s},\nrepoAddresses=%v", err.Error(), repoAddresses))
+	service.logger.Debug(fmt.Sprintf("repo.GetAll() returned err={%v},\nrepoAddresses=%v", err, repoAddresses))
 	if err != nil {
 		return err
 	}
 
 	err = service.sender.SendEmails(*email, repoAddresses)
-	service.logger.Debug(fmt.Sprintf("sender.SendEmails() returned err={%s}", err.Error()))
+	service.logger.Debug(fmt.Sprintf("sender.SendEmails() returned err={%v}", err))
 
 	return err
 }

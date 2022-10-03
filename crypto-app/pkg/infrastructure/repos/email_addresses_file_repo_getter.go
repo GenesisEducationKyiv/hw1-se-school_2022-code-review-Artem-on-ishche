@@ -19,9 +19,10 @@ type EmailAddressesFileRepoGetter struct {
 	logger services.Logger
 }
 
-func NewEmailAddressesFileRepoGetter() *EmailAddressesFileRepoGetter {
+func NewEmailAddressesFileRepoGetter(logger services.Logger) *EmailAddressesFileRepoGetter {
 	return &EmailAddressesFileRepoGetter{
-		repos: make(map[string]services.EmailAddressesRepository),
+		repos:  make(map[string]services.EmailAddressesRepository),
+		logger: logger,
 	}
 }
 

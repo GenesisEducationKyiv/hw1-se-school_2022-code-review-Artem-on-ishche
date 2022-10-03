@@ -19,14 +19,14 @@ type sendEmailsRequestParameters struct {
 
 type SendEmailsRequestHandler struct {
 	SendRateEmailsService application.SendRateEmailsService
-	logger                services.Logger
+	Logger                services.Logger
 }
 
 func (handler *SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params sendEmailsRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
-		handler.logger.Error("Input parameters to /sendEmails are wrong")
+		handler.Logger.Error("Input parameters to /sendEmails are wrong")
 
 		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
@@ -35,7 +35,7 @@ func (handler *SendEmailsRequestHandler) HandleRequest(ctx *gin.Context) *JSONRe
 	pair := getCurrencyPair(params.Base, params.Quote)
 
 	err := handler.SendRateEmailsService.SendRateEmails(pair, key)
-	handler.logger.Debug(fmt.Sprintf("SendRateEmails() returned err=%s", err.Error()))
+	handler.Logger.Debug(fmt.Sprintf("SendRateEmails() returned err=%v", err))
 
 	if errors.Is(err, nil) {
 		return NewJSONResponse(http.StatusOK, "Success")

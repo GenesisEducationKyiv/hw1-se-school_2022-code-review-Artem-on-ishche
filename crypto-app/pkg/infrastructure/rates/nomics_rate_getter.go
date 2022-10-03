@@ -11,6 +11,7 @@ import (
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/pkg/domain/services"
 )
 
 const nomicsRequestFormatString = "https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v"
@@ -21,13 +22,15 @@ type receivedNomicsAPIResponse struct {
 }
 
 type NomicsAPIClientFactory struct {
-	Mediator *Mediator
+	Cacher CacherRateService
+	Logger services.Logger
 }
 
 func (factory NomicsAPIClientFactory) CreateRateService() ExchangeRateServiceChain {
 	return &exchangeRateService{
-		mediator:           factory.Mediator,
 		concreteRateClient: nomicsAPIClient{},
+		cacher:             factory.Cacher,
+		logger:             factory.Logger,
 	}
 }
 

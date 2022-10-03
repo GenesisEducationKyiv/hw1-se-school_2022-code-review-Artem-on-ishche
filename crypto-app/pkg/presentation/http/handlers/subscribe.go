@@ -19,21 +19,21 @@ type subscribeRequestParameters struct {
 
 type SubscribeRequestHandler struct {
 	RateSubscriptionService application.RateSubscriptionService
-	logger                  services.Logger
+	Logger                  services.Logger
 }
 
 func (handler SubscribeRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params subscribeRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
-		handler.logger.Error("Input parameters to /subscribe are wrong")
+		handler.Logger.Error("Input parameters to /subscribe are wrong")
 
 		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
 
 	emailAddress, err := models.NewEmailAddress(params.EmailAddrString)
 	if err != nil {
-		handler.logger.Error("Email parameter to /subscribe is invalid: " + params.EmailAddrString)
+		handler.Logger.Error("Email parameter to /subscribe is invalid: " + params.EmailAddrString)
 
 		return NewJSONResponse(http.StatusBadRequest, "Provided email address is invalid")
 	}
@@ -41,7 +41,7 @@ func (handler SubscribeRequestHandler) HandleRequest(ctx *gin.Context) *JSONResp
 	pair := getCurrencyPair(params.Base, params.Quote)
 
 	err = handler.RateSubscriptionService.Subscribe(emailAddress, pair)
-	handler.logger.Debug(fmt.Sprintf("SendRateEmails() returned err=%s", err.Error()))
+	handler.Logger.Debug(fmt.Sprintf("RateSubscriptionService.Subscribe() returned err=%v", err))
 
 	if err == nil {
 		return NewJSONResponse(http.StatusOK, "Success")

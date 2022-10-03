@@ -1,11 +1,12 @@
 package config
 
 import (
-	"log"
 	"os"
 	"regexp"
 
 	"github.com/joho/godotenv"
+
+	"gses2.app/api/pkg/domain/services"
 )
 
 var (
@@ -21,12 +22,14 @@ var (
 	AdminKey               string
 )
 
-func LoadEnv() {
-	loadFile()
+func LoadEnv(loggerService services.Logger) {
+	loadFile(loggerService)
 	loadVariables()
 }
 
-func loadFile() {
+func loadFile(loggerService services.Logger) {
+	loggerService.Info("Loading .env file")
+
 	projectDirName := "crypto-app"
 	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
 	currentWorkDirectory, _ := os.Getwd()
@@ -34,8 +37,10 @@ func loadFile() {
 
 	err := godotenv.Load(string(rootPath) + `/.env`)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		loggerService.Error("Error loading .env file")
 	}
+
+	loggerService.Info("Successfully loaded .env file")
 }
 
 func loadVariables() {

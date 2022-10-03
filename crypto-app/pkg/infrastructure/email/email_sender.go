@@ -2,6 +2,7 @@ package email
 
 import (
 	"fmt"
+
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
@@ -17,12 +18,14 @@ type emailClient struct {
 	logger services.Logger
 }
 
-func GetEmailClient() services.EmailSender {
+func GetEmailClient(logger services.Logger) services.EmailSender {
 	return &emailClient{
 		emailAddress:  config.EmailAddress,
 		emailPassword: config.EmailPassword,
 		smtpHost:      "smtp.gmail.com",
 		smtpPort:      "587",
+
+		logger: logger,
 	}
 }
 

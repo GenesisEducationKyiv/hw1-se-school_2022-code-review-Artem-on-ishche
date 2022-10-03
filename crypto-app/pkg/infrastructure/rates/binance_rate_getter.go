@@ -10,6 +10,7 @@ import (
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
+	"gses2.app/api/pkg/domain/services"
 )
 
 const binanceRequestFormatString = "https://api.binance.com/api/v3/avgPrice?symbol=%s%s"
@@ -20,13 +21,15 @@ type receivedBinanceAPIResponse struct {
 }
 
 type BinanceAPIClientFactory struct {
-	Mediator *Mediator
+	Cacher CacherRateService
+	Logger services.Logger
 }
 
 func (factory BinanceAPIClientFactory) CreateRateService() ExchangeRateServiceChain {
 	return &exchangeRateService{
-		mediator:           factory.Mediator,
 		concreteRateClient: &binanceAPIClient{},
+		cacher:             factory.Cacher,
+		logger:             factory.Logger,
 	}
 }
 

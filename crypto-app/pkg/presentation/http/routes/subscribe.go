@@ -21,7 +21,7 @@ func (route *SubscribeRoute) GetMethod() string {
 }
 
 func (route *SubscribeRoute) ProcessRequest(ctx *gin.Context) {
-	route.logger.Info(ctx.Request.URL.RawQuery + " called")
+	route.logger.Info(route.GetPath() + "?" + ctx.Request.URL.RawQuery + " called")
 
 	sendJSONResponse(route.logger, ctx, route.handler.HandleRequest)
 }

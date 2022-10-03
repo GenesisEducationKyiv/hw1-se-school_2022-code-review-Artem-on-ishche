@@ -12,11 +12,12 @@ func SetupRouter(
 	rateService services.ExchangeRateService,
 	rateSubscriptionService application.RateSubscriptionService,
 	sendRateEmailsService application.SendRateEmailsService,
+	logger services.Logger,
 ) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
-	routes := initRoutes(rateService, rateSubscriptionService, sendRateEmailsService)
+	routes := initRoutes(rateService, rateSubscriptionService, sendRateEmailsService, logger)
 
 	registerRoutes(router, routes)
 
@@ -27,10 +28,20 @@ func initRoutes(
 	rateService services.ExchangeRateService,
 	rateSubscriptionService application.RateSubscriptionService,
 	sendRateEmailsService application.SendRateEmailsService,
+	logger services.Logger,
 ) []RequestRoute {
-	rateRoute := RateRoute{handler: handlers.RateRequestHandler{ExchangeRateService: rateService}}
-	subscribeRoute := SubscribeRoute{handler: handlers.SubscribeRequestHandler{RateSubscriptionService: rateSubscriptionService}}
-	sendEmailsRoute := SendEmailsRoute{handler: handlers.SendEmailsRequestHandler{SendRateEmailsService: sendRateEmailsService}}
+	rateRoute := RateRoute{
+		handler: handlers.RateRequestHandler{ExchangeRateService: rateService, Logger: logger},
+		logger:  logger,
+	}
+	subscribeRoute := SubscribeRoute{
+		handler: handlers.SubscribeRequestHandler{RateSubscriptionService: rateSubscriptionService, Logger: logger},
+		logger:  logger,
+	}
+	sendEmailsRoute := SendEmailsRoute{
+		handler: handlers.SendEmailsRequestHandler{SendRateEmailsService: sendRateEmailsService, Logger: logger},
+		logger:  logger,
+	}
 
 	return []RequestRoute{&rateRoute, &subscribeRoute, &sendEmailsRoute}
 }

@@ -23,7 +23,7 @@ func NewSubscribeToRateServiceImpl(
 }
 
 func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error {
-	s.logger.Debug(fmt.Sprintf("Subscribe() called with emailAddress=%s, currencyPair=%s",
+	s.logger.Debug(fmt.Sprintf("Subscribe() called with emailAddress=%s, currencyPair={%s}",
 		emailAddress.String(), currencyPair.String()))
 
 	repository := s.repoGetter.GetEmailAddressesRepositories(currencyPair)[0]
@@ -32,7 +32,7 @@ func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress
 		repository.AssociatedCurrencyPair().String()))
 
 	isEmailSaved, err := repository.IsSaved(*emailAddress)
-	s.logger.Debug(fmt.Sprintf("repository.IsSaved() returned isEmailSaved=%v, err=%s", isEmailSaved, err.Error()))
+	s.logger.Debug(fmt.Sprintf("repository.IsSaved() returned isEmailSaved=%v, err={%s}", isEmailSaved, err))
 
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress
 	}
 
 	err = repository.Add(*emailAddress)
-	s.logger.Debug(fmt.Sprintf("repository.Add() returned err={%s}", err.Error()))
+	s.logger.Debug(fmt.Sprintf("repository.Add() returned err={%v}", err))
 
 	return nil
 }

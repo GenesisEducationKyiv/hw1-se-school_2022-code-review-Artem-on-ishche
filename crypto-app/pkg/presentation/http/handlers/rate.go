@@ -24,14 +24,14 @@ type rateRequestParameters struct {
 
 type RateRequestHandler struct {
 	ExchangeRateService services.ExchangeRateService
-	logger              services.Logger
+	Logger              services.Logger
 }
 
 func (handler *RateRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse {
 	var params rateRequestParameters
 
 	if err := ctx.ShouldBind(&params); err != nil {
-		handler.logger.Error("Input parameters to /rate are wrong")
+		handler.Logger.Error("Input parameters to /rate are wrong")
 
 		return NewJSONResponse(http.StatusBadRequest, "Input parameters are wrong")
 	}
@@ -40,10 +40,10 @@ func (handler *RateRequestHandler) HandleRequest(ctx *gin.Context) *JSONResponse
 	handleEmptyParameter(&params.Quote, defaultQuoteName)
 
 	pair := getCurrencyPair(params.Base, params.Quote)
-	handler.logger.Debug(fmt.Sprintf("the pair after substituting empty parameters is: %s", pair.String()))
+	handler.Logger.Debug(fmt.Sprintf("the pair after substituting empty parameters is: %s", pair.String()))
 
 	exchangeRate, err := handler.ExchangeRateService.GetExchangeRate(*pair)
-	handler.logger.Debug(fmt.Sprintf("GetExchangeRate() returned exchangeRate=%s, err=%s", exchangeRate.String(), err.Error()))
+	handler.Logger.Debug(fmt.Sprintf("GetExchangeRate() returned exchangeRate={%s}, err=%v", exchangeRate.String(), err))
 
 	if errors.Is(err, nil) {
 		return NewJSONResponse(http.StatusOK, exchangeRate.Price)
