@@ -25,7 +25,7 @@ func TestSendEmailsWithNoReceivers(t *testing.T) {
 }
 
 func TestSendEmails(t *testing.T) {
-	config.LoadEnv(publicmocks.EmptyLogger)
+	config.LoadEnv()
 
 	client, ctx := createClientAndContext()
 	inbox, _, _ := client.InboxControllerApi.CreateInbox(ctx, nil)

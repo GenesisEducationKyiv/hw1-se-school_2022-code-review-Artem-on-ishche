@@ -54,3 +54,7 @@ linters-settings:
     rules:
       - name: context-as-argument
         disabled: true
+  stylecheck:
+    checks: [ "all", "-ST1003" ]
+  gomnd:
+    checks: [ "argument", "case", "condition", "operation", "return" ]

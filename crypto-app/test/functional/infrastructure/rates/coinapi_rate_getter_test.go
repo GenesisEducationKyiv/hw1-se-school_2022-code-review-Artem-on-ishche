@@ -5,11 +5,10 @@ import (
 
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/infrastructure/rates"
-	"gses2.app/api/test/functional/publicmocks"
 )
 
 func TestCoinAPIClient(t *testing.T) {
-	config.LoadEnv(publicmocks.EmptyLogger)
+	config.LoadEnv()
 
 	coinAPIClient := rates.CoinAPIClientFactory{}.CreateRateService()
 

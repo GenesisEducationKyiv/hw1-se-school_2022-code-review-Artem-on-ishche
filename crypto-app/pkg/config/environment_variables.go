@@ -20,7 +20,7 @@ var (
 	CryptoCurrencyProvider string
 	AdminKey               string
 
-	AmqpURL string
+	AmqpUrl string
 )
 
 func LoadEnv() {
@@ -54,5 +54,5 @@ func loadVariables() {
 	CryptoCurrencyProvider = os.Getenv("CRYPTO_CURRENCY_PROVIDER")
 	AdminKey = os.Getenv("ADMIN_KEY")
 
-	AmqpURL = os.Getenv("APQP_URL")
+	AmqpUrl = os.Getenv("APQP_URL")
 }

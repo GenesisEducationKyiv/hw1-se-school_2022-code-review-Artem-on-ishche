@@ -24,7 +24,7 @@ type rabbitMQLogger struct {
 }
 
 func NewRabbitMQLogger() *rabbitMQLogger {
-	connection, err := amqp.Dial(config.AmqpURL)
+	connection, err := amqp.Dial(config.AmqpUrl)
 	handleError(err, "Failed to connect to RabbitMQ")
 
 	channel, err := connection.Channel()

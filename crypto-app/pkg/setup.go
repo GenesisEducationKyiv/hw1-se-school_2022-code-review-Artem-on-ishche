@@ -34,8 +34,7 @@ func InitServices(loggerService services.Logger) (
 }
 
 func GetGenericExchangeRateService(loggerService services.Logger) services.ExchangeRateService {
-	fiveMinutes := time.Second * 5
-	cacherRateService := rates.CacherRateServiceFactory{MaxTime: fiveMinutes, Logger: loggerService}.CreateRateService()
+	cacherRateService := rates.CacherRateServiceFactory{MaxTime: time.Minute * 5, Logger: loggerService}.CreateRateService()
 
 	coinRateService := rates.CoinAPIClientFactory{Cacher: cacherRateService, Logger: loggerService}.CreateRateService()
 	nomicsRateService := rates.NomicsAPIClientFactory{Cacher: cacherRateService, Logger: loggerService}.CreateRateService()
