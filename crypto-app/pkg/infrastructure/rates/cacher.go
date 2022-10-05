@@ -8,16 +8,16 @@ import (
 )
 
 type CacherRateServiceFactory struct {
-	MaxTime float64
+	MaxTime time.Duration
 
 	Logger services.Logger
 }
 
 func (factory CacherRateServiceFactory) CreateRateService() CacherRateService {
 	return &inMemoryCacher{
-		maximumCacheTimeInMinutes: factory.MaxTime,
-		cachedResponses:           make(map[string]parsedResponse),
-		logger:                    factory.Logger,
+		maximumCacheTime: factory.MaxTime,
+		cachedResponses:  make(map[string]parsedResponse),
+		logger:           factory.Logger,
 	}
 }
 
@@ -28,9 +28,9 @@ type CacherRateService interface {
 }
 
 type inMemoryCacher struct {
-	next                      *ExchangeRateServiceChain
-	maximumCacheTimeInMinutes float64
-	cachedResponses           map[string]parsedResponse
+	next             *ExchangeRateServiceChain
+	maximumCacheTime time.Duration
+	cachedResponses  map[string]parsedResponse
 
 	logger services.Logger
 }
@@ -69,5 +69,5 @@ func (cacher *inMemoryCacher) Update(pair *models.CurrencyPair, response *parsed
 func (cacher *inMemoryCacher) isCachedResponseOutdated(response parsedResponse) bool {
 	currentTime := time.Now()
 
-	return currentTime.Sub(response.time).Minutes() >= cacher.maximumCacheTimeInMinutes
+	return currentTime.Sub(response.time) >= cacher.maximumCacheTime
 }

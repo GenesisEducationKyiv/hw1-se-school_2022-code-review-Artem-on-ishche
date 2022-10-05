@@ -3,16 +3,19 @@ package logger
 import (
 	"context"
 	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+
+	"gses2.app/api/pkg/config"
 )
 
 const (
-	amqpURL         = "amqp://guest:guest@localhost:5672/"
 	exchangeName    = "logs"
 	debugRoutingKey = "debug"
 	infoRoutingKey  = "info"
 	errorRoutingKey = "error"
+	timeFormat      = "2006-01-02 15:04:05 "
 )
 
 type rabbitMQLogger struct {
@@ -21,7 +24,7 @@ type rabbitMQLogger struct {
 }
 
 func NewRabbitMQLogger() *rabbitMQLogger {
-	connection, err := amqp.Dial(amqpURL)
+	connection, err := amqp.Dial(config.AmqpURL)
 	handleError(err, "Failed to connect to RabbitMQ")
 
 	channel, err := connection.Channel()
@@ -44,16 +47,16 @@ func NewRabbitMQLogger() *rabbitMQLogger {
 	}
 }
 
-func (logger *rabbitMQLogger) Debug(text string) {
-	logger.sendMessage(text, debugRoutingKey)
+func (logger *rabbitMQLogger) Debug(messageText string) {
+	logger.sendMessage(getTimeText()+messageText, debugRoutingKey)
 }
 
-func (logger *rabbitMQLogger) Info(text string) {
-	logger.sendMessage(text, infoRoutingKey)
+func (logger *rabbitMQLogger) Info(messageText string) {
+	logger.sendMessage(getTimeText()+messageText, infoRoutingKey)
 }
 
-func (logger *rabbitMQLogger) Error(text string) {
-	logger.sendMessage(text, errorRoutingKey)
+func (logger *rabbitMQLogger) Error(messageText string) {
+	logger.sendMessage(getTimeText()+messageText, errorRoutingKey)
 }
 
 func (logger *rabbitMQLogger) Close() {
@@ -62,6 +65,10 @@ func (logger *rabbitMQLogger) Close() {
 
 	err = logger.connection.Close()
 	handleError(err, "Failed to close connection to RabbitMQ")
+}
+
+func getTimeText() string {
+	return time.Now().Format(timeFormat)
 }
 
 func (logger *rabbitMQLogger) sendMessage(text, key string) {

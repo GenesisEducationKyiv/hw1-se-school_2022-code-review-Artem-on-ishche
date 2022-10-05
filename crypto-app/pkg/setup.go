@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"time"
+
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/services"
@@ -32,7 +34,7 @@ func InitServices(loggerService services.Logger) (
 }
 
 func GetGenericExchangeRateService(loggerService services.Logger) services.ExchangeRateService {
-	fiveMinutes := 5.0
+	fiveMinutes := time.Second * 5
 	cacherRateService := rates.CacherRateServiceFactory{MaxTime: fiveMinutes, Logger: loggerService}.CreateRateService()
 
 	coinRateService := rates.CoinAPIClientFactory{Cacher: cacherRateService, Logger: loggerService}.CreateRateService()

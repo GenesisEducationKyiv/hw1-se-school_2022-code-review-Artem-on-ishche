@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
+	config.LoadEnv()
+
 	loggerService := logger.NewRabbitMQLogger()
 	defer loggerService.Close()
-
-	config.LoadEnv(loggerService)
 
 	err := routes.SetupRouter(pkg.InitServices(loggerService)).Run(config.NetworkPort)
 	if err != nil {

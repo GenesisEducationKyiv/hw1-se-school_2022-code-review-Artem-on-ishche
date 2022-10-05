@@ -1,12 +1,11 @@
 package config
 
 import (
+	"log"
 	"os"
 	"regexp"
 
 	"github.com/joho/godotenv"
-
-	"gses2.app/api/pkg/domain/services"
 )
 
 var (
@@ -20,15 +19,17 @@ var (
 	NetworkPort            string
 	CryptoCurrencyProvider string
 	AdminKey               string
+
+	AmqpURL string
 )
 
-func LoadEnv(loggerService services.Logger) {
-	loadFile(loggerService)
+func LoadEnv() {
+	loadFile()
 	loadVariables()
 }
 
-func loadFile(loggerService services.Logger) {
-	loggerService.Info("Loading .env file")
+func loadFile() {
+	log.Println("Loading .env file")
 
 	projectDirName := "btc_application"
 	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
@@ -37,10 +38,8 @@ func loadFile(loggerService services.Logger) {
 
 	err := godotenv.Load(string(rootPath) + `/crypto-app/.env`)
 	if err != nil {
-		loggerService.Error("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
-
-	loggerService.Info("Successfully loaded .env file")
 }
 
 func loadVariables() {
@@ -54,4 +53,6 @@ func loadVariables() {
 	NetworkPort = os.Getenv("NETWORK_PORT")
 	CryptoCurrencyProvider = os.Getenv("CRYPTO_CURRENCY_PROVIDER")
 	AdminKey = os.Getenv("ADMIN_KEY")
+
+	AmqpURL = os.Getenv("APQP_URL")
 }
