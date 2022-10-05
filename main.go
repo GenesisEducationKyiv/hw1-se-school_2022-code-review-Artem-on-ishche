@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
+
 	"gses2.app/api/pkg"
 	"gses2.app/api/pkg/config"
-	"gses2.app/api/pkg/presentation/http"
+	"gses2.app/api/pkg/presentation/http/routes"
 )
 
 func main() {
 	config.LoadEnv()
-	http.StartRouter(pkg.InitServices())
+	log.Fatal(routes.SetupRouter(pkg.InitServices()).Run(config.NetworkPort))
 }

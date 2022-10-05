@@ -307,7 +307,7 @@ var testHookStartTLS func(*tls.Config) // nil, except for tests
 // The msg parameter should be an RFC 822-style email with headers
 // first, a blank line, and then the message body. The lines of msg
 // should be CRLF terminated. The msg headers should usually include
-// fields such as "From", "To", "Subject", and "Cc".  Sending "Bcc"
+// fields such as "Base", "Quote", "Subject", and "Cc".  Sending "Bcc"
 // messages is accomplished by including an email address in the to
 // parameter but not including it in the msg headers.
 //

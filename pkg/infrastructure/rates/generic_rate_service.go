@@ -5,9 +5,11 @@ import (
 
 	"gopkg.in/resty.v0"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
+
+const timeLayout = "2006-01-02T15:04:05.999Z"
 
 type RateServiceFactory interface {
 	CreateRateService() ExchangeRateServiceChain
@@ -15,7 +17,7 @@ type RateServiceFactory interface {
 
 type ExchangeRateServiceChain interface {
 	SetNext(service *ExchangeRateServiceChain)
-	GetExchangeRate(pair models.CurrencyPair) (float64, error)
+	GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error)
 }
 
 type exchangeRateService struct {
@@ -28,7 +30,7 @@ func (service *exchangeRateService) SetNext(nextService *ExchangeRateServiceChai
 	service.next = nextService
 }
 
-func (service *exchangeRateService) GetExchangeRate(pair models.CurrencyPair) (float64, error) {
+func (service *exchangeRateService) GetExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
 	rate, err := service.getExchangeRate(pair)
 	if err != nil && service.next != nil {
 		return (*service.next).GetExchangeRate(pair)
@@ -37,27 +39,27 @@ func (service *exchangeRateService) GetExchangeRate(pair models.CurrencyPair) (f
 	return rate, err
 }
 
-func (service *exchangeRateService) getExchangeRate(pair models.CurrencyPair) (float64, error) {
+func (service *exchangeRateService) getExchangeRate(pair models.CurrencyPair) (*models.ExchangeRate, error) {
 	resp, err := service.makeAPIRequest(pair)
 	if err != nil {
-		return -1, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	if resp.StatusCode() != http.StatusOK {
 		service.notifyMediatorAboutFailureAPIResponseReceived(pair, resp)
 
-		return -1, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	parsedResponse, err := service.concreteRateClient.parseResponseBody(resp.Body)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	service.notifyMediatorAboutSuccessAPIResponseReceived(pair, parsedResponse)
 	service.notifyMediatorAboutNewRateReturned(&pair, parsedResponse)
 
-	return parsedResponse.rate, nil
+	return models.NewExchangeRate(pair, parsedResponse.price, parsedResponse.time), nil
 }
 
 func (service *exchangeRateService) makeAPIRequest(pair models.CurrencyPair) (*resty.Response, error) {
@@ -70,7 +72,7 @@ func (service *exchangeRateService) makeAPIRequest(pair models.CurrencyPair) (*r
 func (service *exchangeRateService) notifyMediatorAboutFailureAPIResponseReceived(pair models.CurrencyPair, response *resty.Response) {
 	(*service.mediator).Notify(FailureAPIResponseReceivedEvent{failureAPIResponseReceivedEventData{
 		pair:       &pair,
-		provider:   service.concreteRateClient.getName(),
+		provider:   service.concreteRateClient.name(),
 		statusCode: response.StatusCode(),
 	}})
 }
@@ -78,7 +80,7 @@ func (service *exchangeRateService) notifyMediatorAboutFailureAPIResponseReceive
 func (service *exchangeRateService) notifyMediatorAboutSuccessAPIResponseReceived(pair models.CurrencyPair, response *parsedResponse) {
 	(*service.mediator).Notify(SuccessAPIResponseReceivedEvent{successAPIResponseReceivedEventData{
 		pair:     &pair,
-		provider: service.concreteRateClient.getName(),
+		provider: service.concreteRateClient.name(),
 		response: response,
 	}})
 }

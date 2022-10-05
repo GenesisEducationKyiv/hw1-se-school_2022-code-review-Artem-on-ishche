@@ -36,9 +36,9 @@ func getFailureAPIResponseReceivedLogText(eventData failureAPIResponseReceivedEv
 	return fmt.Sprintf(
 		`
 %s:
-  requested rate - {%s - %s}
+  requested price - {%s - %s}
   response - {status code: %v}`,
-		eventData.provider, eventData.pair.From, eventData.pair.To, eventData.statusCode)
+		eventData.provider, eventData.pair.Base, eventData.pair.Quote, eventData.statusCode)
 }
 
 type SuccessAPIResponseReceivedObserver struct {
@@ -57,10 +57,10 @@ func getSuccessAPIResponseReceivedLogText(eventData successAPIResponseReceivedEv
 	return fmt.Sprintf(
 		`
 %s:
-  requested rate - {%s - %s}
+  requested price - {%s - %s}
   response - {
-    rate: %v,
+    price: %v,
     time: %v
   }`,
-		eventData.provider, eventData.pair.From, eventData.pair.To, eventData.response.rate, eventData.response.time)
+		eventData.provider, eventData.pair.Base, eventData.pair.Quote, eventData.response.price, eventData.response.time)
 }

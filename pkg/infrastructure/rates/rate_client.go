@@ -9,12 +9,12 @@ import (
 )
 
 type parsedResponse struct {
-	rate float64
-	time time.Time
+	price float64
+	time  time.Time
 }
 
 type exchangeRateAPIClient interface {
-	getName() string
+	name() string
 	getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string
 	getAPIRequest() *resty.Request
 	parseResponseBody(responseBody []byte) (*parsedResponse, error)

@@ -11,19 +11,23 @@ import (
 )
 
 func InitServices() (
-	application.BtcToUahRateService,
-	application.AddEmailAddressService,
-	application.SendBtcToUahRateEmailsService,
+	services.ExchangeRateService,
+	application.RateSubscriptionService,
+	application.SendRateEmailsService,
 ) {
 	genericExchangeRateService := GetGenericExchangeRateService()
-	emailAddressesRepository := repos.GetEmailAddressesFileRepository()
+	repositoryGetter := repos.NewEmailAddressesFileRepoGetter()
 	emailSender := email.GetEmailClient()
 
-	btcToUahService := application.NewBtcToUahServiceImpl(genericExchangeRateService)
-	addEmailAddressService := application.NewAddEmailAddressServiceImpl(emailAddressesRepository)
-	sendBtcToUahRateEmailsService := application.NewSendBtcToUahRateEmailsServiceImpl(btcToUahService, emailAddressesRepository, emailSender)
+	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter)
+	sendBtcToUahRateEmailsService := application.NewSendRateEmailsServiceImpl(
+		config.AdminKey,
+		genericExchangeRateService,
+		repositoryGetter,
+		emailSender,
+	)
 
-	return btcToUahService, addEmailAddressService, sendBtcToUahRateEmailsService
+	return genericExchangeRateService, subscribeToRateService, sendBtcToUahRateEmailsService
 }
 
 func GetGenericExchangeRateService() services.ExchangeRateService {
@@ -35,24 +39,24 @@ func GetGenericExchangeRateService() services.ExchangeRateService {
 
 	coinRateService := rates.CoinAPIClientFactory{Mediator: mediator}.CreateRateService()
 	nomicsRateService := rates.NomicsAPIClientFactory{Mediator: mediator}.CreateRateService()
-	coinMarketCapRateService := rates.CoinMarketCapAPIClientFactory{Mediator: mediator}.CreateRateService()
+	binanceRateService := rates.BinanceAPIClientFactory{Mediator: mediator}.CreateRateService()
 
 	switch config.CryptoCurrencyProvider {
 	case "coin":
 		cacherRateService.SetNext(&coinRateService)
 		coinRateService.SetNext(&nomicsRateService)
-		nomicsRateService.SetNext(&coinMarketCapRateService)
+		nomicsRateService.SetNext(&binanceRateService)
 
 		return cacherRateService
 	case "nomics":
 		cacherRateService.SetNext(&nomicsRateService)
 		nomicsRateService.SetNext(&coinRateService)
-		coinRateService.SetNext(&coinMarketCapRateService)
+		coinRateService.SetNext(&binanceRateService)
 
 		return cacherRateService
-	case "coin_market_cap":
-		cacherRateService.SetNext(&coinMarketCapRateService)
-		coinMarketCapRateService.SetNext(&coinRateService)
+	case "binance":
+		cacherRateService.SetNext(&binanceRateService)
+		binanceRateService.SetNext(&coinRateService)
 		coinRateService.SetNext(&nomicsRateService)
 
 		return cacherRateService

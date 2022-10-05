@@ -3,22 +3,23 @@ package repos
 import (
 	"bufio"
 	"os"
+	"strings"
 
-	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
 
 type emailAddressesFileRepository struct {
+	path     string
 	filename string
 }
 
-func GetEmailAddressesFileRepository() services.EmailAddressesRepository {
-	return &emailAddressesFileRepository{filename: config.Filename}
+func NewEmailAddressesFileRepository(path, filename string) services.EmailAddressesRepository {
+	return &emailAddressesFileRepository{path: path, filename: filename}
 }
 
 func (repository emailAddressesFileRepository) IsSaved(emailAddress models.EmailAddress) (bool, error) {
-	file, err := os.Open(repository.filename)
+	file, err := os.Open(repository.fullFileName())
 	if err != nil {
 		return false, nil
 	}
@@ -29,23 +30,13 @@ func (repository emailAddressesFileRepository) IsSaved(emailAddress models.Email
 	return doesFileContainEmailAddress(scanner, string(emailAddress)), nil
 }
 
-func doesFileContainEmailAddress(scanner *bufio.Scanner, emailAddress string) bool {
-	for scanner.Scan() {
-		if scanner.Text() == emailAddress {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (repository emailAddressesFileRepository) Add(emailAddress models.EmailAddress) error {
 	const (
 		fileModeFlags       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 		fileModePermutation = 0o644
 	)
 
-	file, err := os.OpenFile(repository.filename, fileModeFlags, fileModePermutation)
+	file, err := os.OpenFile(repository.fullFileName(), fileModeFlags, fileModePermutation)
 	if err != nil {
 		return err
 	}
@@ -60,7 +51,7 @@ func (repository emailAddressesFileRepository) Add(emailAddress models.EmailAddr
 func (repository emailAddressesFileRepository) GetAll() ([]models.EmailAddress, error) {
 	var emailAddresses []models.EmailAddress
 
-	file, err := os.Open(config.Filename)
+	file, err := os.Open(repository.fullFileName())
 	if err != nil {
 		return emailAddresses, nil
 	}
@@ -75,20 +66,17 @@ func (repository emailAddressesFileRepository) GetAll() ([]models.EmailAddress, 
 	return emailAddresses, nil
 }
 
-func scanAddressesFromFile(file *os.File) ([]models.EmailAddress, error) {
-	var emailAddresses []models.EmailAddress
+func (repository emailAddressesFileRepository) AssociatedCurrencyPair() *models.CurrencyPair {
+	fileName := strings.ReplaceAll(repository.filename, fileExtension, "")
+	tokens := strings.Split(fileName, models.CurrencySeparator)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		text := scanner.Text()
+	base := models.NewCurrency(tokens[0])
+	quote := models.NewCurrency(tokens[1])
+	pair := models.NewCurrencyPair(base, quote)
 
-		emailAddress, err := models.NewEmailAddress(text)
-		if err != nil {
-			return emailAddresses, services.ErrEmailStorageFailure
-		}
+	return &pair
+}
 
-		emailAddresses = append(emailAddresses, *emailAddress)
-	}
-
-	return emailAddresses, nil
+func (repository emailAddressesFileRepository) fullFileName() string {
+	return repository.path + repository.filename
 }

@@ -5,27 +5,29 @@ import (
 	"gses2.app/api/pkg/domain/services"
 )
 
-type AddEmailAddressService interface {
-	AddEmailAddress(emailAddress models.EmailAddress) error
+type RateSubscriptionService interface {
+	Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error
 }
 
-type addEmailAddressServiceImpl struct {
-	repository services.EmailAddressesRepository
+type rateSubscriptionServiceImpl struct {
+	repoGetter services.EmailAddressesRepositoryGetter
 }
 
-func NewAddEmailAddressServiceImpl(repository services.EmailAddressesRepository) AddEmailAddressService {
-	return &addEmailAddressServiceImpl{repository}
+func NewSubscribeToRateServiceImpl(repoGetter services.EmailAddressesRepositoryGetter) *rateSubscriptionServiceImpl {
+	return &rateSubscriptionServiceImpl{repoGetter: repoGetter}
 }
 
-func (addEmailService *addEmailAddressServiceImpl) AddEmailAddress(emailAddress models.EmailAddress) error {
-	isEmailSaved, err := addEmailService.repository.IsSaved(emailAddress)
+func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error {
+	repository := s.repoGetter.GetEmailAddressesRepositories(currencyPair)[0]
+
+	isEmailSaved, err := repository.IsSaved(*emailAddress)
 	if err != nil {
 		return err
 	}
 
 	if isEmailSaved {
-		return services.ErrEmailAddressAlreadyExists(string(emailAddress))
+		return ErrEmailAddressAlreadyExists(emailAddress.String())
 	}
 
-	return addEmailService.repository.Add(emailAddress)
+	return repository.Add(*emailAddress)
 }

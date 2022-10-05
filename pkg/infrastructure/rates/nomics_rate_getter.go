@@ -8,10 +8,12 @@ import (
 
 	"gopkg.in/resty.v0"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
+
+const nomicsRequestFormatString = "https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v"
 
 type receivedNomicsAPIResponse struct {
 	Price          string `json:"price"`
@@ -31,16 +33,16 @@ func (factory NomicsAPIClientFactory) CreateRateService() ExchangeRateServiceCha
 
 type nomicsAPIClient struct{}
 
-func (c nomicsAPIClient) getName() string {
+func (c nomicsAPIClient) name() string {
 	return "Nomics"
 }
 
 func (c nomicsAPIClient) getAPIRequestURLForGivenCurrencies(pair models.CurrencyPair) string {
 	return fmt.Sprintf(
-		"https://api.nomics.com/v1/currencies/ticker?key=%v&ids=%v&interval=1d&convert=%v",
+		nomicsRequestFormatString,
 		config.NomicsAPIKeyValue,
-		pair.From.Name,
-		pair.To.Name,
+		pair.Base.Name,
+		pair.Quote.Name,
 	)
 }
 
@@ -53,11 +55,11 @@ func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse
 
 	err := json.Unmarshal(responseBody, &results)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	if len(results) == 0 {
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
 	result := results[0]
@@ -65,16 +67,16 @@ func (c nomicsAPIClient) parseResponseBody(responseBody []byte) (*parsedResponse
 
 	price, err := strconv.ParseFloat(result.Price, bitSize)
 	if err != nil {
-		return nil, services.ErrAPIRequestUnsuccessful
+		return nil, application.ErrAPIRequestUnsuccessful
 	}
 
-	timestamp, err := time.Parse("2006-01-02T15:04:05Z", result.PriceTimestamp)
+	timestamp, err := time.Parse(timeLayout, result.PriceTimestamp)
 	if err != nil {
-		return nil, services.ErrAPIResponseUnmarshallError
+		return nil, application.ErrAPIResponseUnmarshallError
 	}
 
 	return &parsedResponse{
-		rate: price,
-		time: timestamp,
+		price: price,
+		time:  timestamp,
 	}, nil
 }

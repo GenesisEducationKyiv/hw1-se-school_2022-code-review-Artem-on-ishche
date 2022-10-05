@@ -29,13 +29,13 @@ func (emailClient *emailClient) SendEmails(email models.EmailMessage, receiverAd
 	}
 
 	auth := smtp.PlainAuth("", emailClient.emailAddress, emailClient.emailPassword, emailClient.smtpHost)
-	receiverAddressStrings := emailClient.getEmailAddressStrings(receiverAddresses)
+	receiverAddressStrings := getEmailAddressStrings(receiverAddresses)
 	message := []byte(email.Body)
 
 	return smtp.SendMail(emailClient.smtpHost+":"+emailClient.smtpPort, auth, emailClient.emailAddress, receiverAddressStrings, message)
 }
 
-func (emailClient *emailClient) getEmailAddressStrings(addresses []models.EmailAddress) []string {
+func getEmailAddressStrings(addresses []models.EmailAddress) []string {
 	addressStrings := make([]string, len(addresses))
 
 	for i, addr := range addresses {

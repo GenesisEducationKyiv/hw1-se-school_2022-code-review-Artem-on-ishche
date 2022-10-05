@@ -7,86 +7,53 @@ import (
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
-	"gses2.app/api/pkg/domain/services"
 )
 
-type inMemoryEmailAddressesRepository struct {
-	emailAddresses []models.EmailAddress
-}
-
-func newInMemoryEmailAddressesStorage(emailAddresses []models.EmailAddress) inMemoryEmailAddressesRepository {
-	return inMemoryEmailAddressesRepository{emailAddresses}
-}
-
-func (repository *inMemoryEmailAddressesRepository) IsSaved(emailAddress models.EmailAddress) (bool, error) {
-	for _, address := range repository.emailAddresses {
-		if address == emailAddress {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func (repository *inMemoryEmailAddressesRepository) Add(emailAddress models.EmailAddress) error {
-	repository.emailAddresses = append(repository.emailAddresses, emailAddress)
-
-	return nil
-}
-
-func (repository *inMemoryEmailAddressesRepository) GetAll() ([]models.EmailAddress, error) {
-	return repository.emailAddresses, nil
-}
-
-func TestAddNewEmailAddress(t *testing.T) {
+func TestSubscribe_WithCorrectInput_ReturnsNoError(t *testing.T) {
 	address, _ := models.NewEmailAddress("my_address@domain.extension")
-	storage := newInMemoryEmailAddressesStorage([]models.EmailAddress{})
-	addEmailAddressImpl := application.NewAddEmailAddressServiceImpl(&storage)
+	subscribeServiceImpl := getSubscribeService([]models.EmailAddress{})
 
-	err := addEmailAddressImpl.AddEmailAddress(*address)
+	err := subscribeServiceImpl.Subscribe(address, &btcUahPair)
 
 	assert.Nil(t, err)
 }
 
-func TestAddExistingEmailAddress(t *testing.T) {
+func TestSubscribe_WithAlreadySubscribedAddress_ReturnsError(t *testing.T) {
 	addressString := "my_address@domain.extension"
 	address, _ := models.NewEmailAddress(addressString)
-	storage := newInMemoryEmailAddressesStorage([]models.EmailAddress{*address})
-	addEmailAddressImpl := application.NewAddEmailAddressServiceImpl(&storage)
+	subscribeServiceImpl := getSubscribeService([]models.EmailAddress{*address})
 
-	err := addEmailAddressImpl.AddEmailAddress(*address)
+	err := subscribeServiceImpl.Subscribe(address, &btcUahPair)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, services.ErrEmailAddressAlreadyExists(addressString), err)
+	assert.Equal(t, application.ErrEmailAddressAlreadyExists(addressString), err)
 }
 
-func TestSuccessiveAddingTheSameEmailAddress(t *testing.T) {
+func TestSubscribe_SuccessivelyAddingSameAddress_ReturnsError(t *testing.T) {
 	addressString := "my_address@domain.extension"
 	address, _ := models.NewEmailAddress(addressString)
-	storage := newInMemoryEmailAddressesStorage([]models.EmailAddress{})
-	addEmailAddressImpl := application.NewAddEmailAddressServiceImpl(&storage)
+	subscribeServiceImpl := getSubscribeService([]models.EmailAddress{})
 
-	err := addEmailAddressImpl.AddEmailAddress(*address)
+	err := subscribeServiceImpl.Subscribe(address, &btcUahPair)
 	assert.Nil(t, err)
 
-	err = addEmailAddressImpl.AddEmailAddress(*address)
+	err = subscribeServiceImpl.Subscribe(address, &btcUahPair)
 	assert.NotNil(t, err)
-	assert.Equal(t, services.ErrEmailAddressAlreadyExists(addressString), err)
+	assert.Equal(t, application.ErrEmailAddressAlreadyExists(addressString), err)
 }
 
-func TestAddMultipleNewEmailAddresses(t *testing.T) {
+func TestSubscribe_WithMultipleNewAddresses_ReturnsNoError(t *testing.T) {
 	addressStrings := []string{
 		"address@what.com",
 		"artem.mykytyshyn@gmail.com",
 		"someone@some.mail",
 	}
-	storage := newInMemoryEmailAddressesStorage([]models.EmailAddress{})
-	addEmailAddressImpl := application.NewAddEmailAddressServiceImpl(&storage)
+	subscribeServiceImpl := getSubscribeService([]models.EmailAddress{})
 
 	for _, addressString := range addressStrings {
 		address, _ := models.NewEmailAddress(addressString)
 
-		err := addEmailAddressImpl.AddEmailAddress(*address)
+		err := subscribeServiceImpl.Subscribe(address, &btcUahPair)
 
 		assert.Nil(t, err)
 	}

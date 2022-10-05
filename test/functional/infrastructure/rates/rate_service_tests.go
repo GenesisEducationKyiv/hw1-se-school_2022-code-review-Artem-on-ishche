@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/domain/models"
 	"gses2.app/api/pkg/domain/services"
 )
@@ -17,7 +18,7 @@ var (
 
 var tests = []func(t *testing.T, service services.ExchangeRateService){
 	testThatGetExchangeRateReturnsErrorForUnsupportedCurrencies,
-	testThatGetExchangeRateReturnsMinusOneForUnsupportedCurrencies,
+	testThatGetExchangeRateReturnsNilForUnsupportedCurrencies,
 	testThatGetExchangeRateReturnsNoErrorForSupportedCurrencies,
 	testThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterOneSecond,
 }
@@ -39,17 +40,17 @@ func testThatGetExchangeRateReturnsErrorForUnsupportedCurrencies(t *testing.T, s
 	_, err := service.GetExchangeRate(currencyPair)
 
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, services.ErrAPIRequestUnsuccessful)
+	assert.ErrorIs(t, err, application.ErrAPIRequestUnsuccessful)
 }
 
-func testThatGetExchangeRateReturnsMinusOneForUnsupportedCurrencies(t *testing.T, service services.ExchangeRateService) {
+func testThatGetExchangeRateReturnsNilForUnsupportedCurrencies(t *testing.T, service services.ExchangeRateService) {
 	t.Helper()
 
 	currencyPair := getUnsupportedCurrencies()
 
 	rate, _ := service.GetExchangeRate(currencyPair)
 
-	assert.Equal(t, float64(-1), rate)
+	assert.Equal(t, nil, rate)
 }
 
 func testThatGetExchangeRateReturnsNoErrorForSupportedCurrencies(t *testing.T, service services.ExchangeRateService) {
@@ -76,11 +77,11 @@ func testThatGetExchangeRateReturnValuesDontFluctuateMuchOnSuccessiveCallsAfterO
 
 	rate2, err2 := service.GetExchangeRate(currencyPair)
 
-	delta := rate1 * deltaFraction
+	delta := rate1.Price * deltaFraction
 
 	assert.Nil(t, err1)
 	assert.Nil(t, err2)
-	assert.InDelta(t, rate1, rate2, delta)
+	assert.InDelta(t, rate1.Price, rate2.Price, delta)
 }
 
 func getUnsupportedCurrencies() models.CurrencyPair {

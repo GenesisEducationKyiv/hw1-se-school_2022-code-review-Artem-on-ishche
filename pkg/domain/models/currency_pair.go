@@ -1,13 +1,19 @@
 package models
 
+const CurrencySeparator = "-"
+
 type CurrencyPair struct {
-	From Currency
-	To   Currency
+	Base  Currency
+	Quote Currency
 }
 
-func NewCurrencyPair(from, to Currency) CurrencyPair {
+func (pair *CurrencyPair) String() string {
+	return pair.Base.Name + CurrencySeparator + pair.Quote.Name
+}
+
+func NewCurrencyPair(base, quote Currency) CurrencyPair {
 	return CurrencyPair{
-		From: from,
-		To:   to,
+		Base:  base,
+		Quote: quote,
 	}
 }
