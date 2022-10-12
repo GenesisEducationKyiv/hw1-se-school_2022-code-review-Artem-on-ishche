@@ -1,30 +1,15 @@
-# syntax=docker/dockerfile:1
+FROM golang:1.18-alpine AS build
+RUN apk add build-base
 
-FROM golang:1.18-alpine
+WORKDIR /crypto-app
+COPY . /crypto-app
 
-WORKDIR /app
-
-COPY go.mod ./
-COPY go.sum ./
 RUN go mod download
-
-COPY *.go ./
-COPY .env  ./
-
-RUN mkdir data
-COPY crypto-app/data/*.go ./data/
-
-RUN mkdir emails
-COPY emails/*.go ./emails/
-
-RUN mkdir rates
-COPY rates/*.go ./rates/
-
-RUN mkdir smtp
-COPY crypto-app/pkg/implementations/email/smtp/*.go ./smtp/
-
 RUN go build -o /gses2.app/api
+
+FROM golang:1.18-alpine as run
+COPY --from=build /crypto-app /crypto-app
 
 EXPOSE 8080
 
-CMD [ "/gses2.app/api" ]
+CMD "/gses2.app/api"

@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.9"
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -10,8 +10,29 @@ services:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
-      - rabbitmq_go_net
+      - crypto-network
+
+  crypto-app:
+    build:
+      context: crypto-app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - crypto-network
+    depends_on:
+      - rabbitmq
+
+  logs-consumer:
+    build:
+      context: logs-consumer
+      dockerfile: Dockerfile
+    networks:
+      - crypto-network
+    depends_on:
+      - rabbitmq
+      - crypto-app
 
 networks:
-  rabbitmq_go_net:
+  crypto-network:
     driver: bridge
