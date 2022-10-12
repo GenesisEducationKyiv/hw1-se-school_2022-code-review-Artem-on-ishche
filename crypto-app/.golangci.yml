@@ -1,0 +1,60 @@
+run:
+  skip-dirs:
+    - pkg/infrastructure/email/smtp
+linters:
+  enable-all: true
+  disable:
+    - structcheck
+    - scopelint
+    - deadcode
+    - exhaustivestruct
+    - interfacer
+    - golint
+    - maligned
+    - varcheck
+    - ifshort
+    - nosnakecase
+    - gofmt
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+    - goimports
+    - gochecknoglobals
+    - gosec
+    - wrapcheck
+    - usestdlibvars
+    - testpackage
+    - paralleltest
+    - noctx
+    - ireturn
+    - goerr113
+    - exhaustivestruct
+    - exhaustruct
+    - bodyclose
+    - prealloc
+    - tagliatelle
+    - forcetypeassert
+    - nilerr
+linters-settings:
+  wsl:
+    force-err-cuddling: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(gses2.app/api)
+      - blank
+      - dot
+  lll:
+    line-length: 140
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+  revive:
+    rules:
+      - name: context-as-argument
+        disabled: true
+  stylecheck:
+    checks: [ "all", "-ST1003" ]
+  gomnd:
+    checks: [ "argument", "case", "condition", "operation", "return" ]
