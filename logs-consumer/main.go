@@ -2,12 +2,12 @@ package main
 
 import (
 	"log"
+	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 const (
-	amqpURL      = "amqp://guest:guest@localhost:5672/"
 	exchangeName = "logs"
 	queueName    = "logs-queue"
 	bindingKey   = "error"
@@ -25,6 +25,8 @@ func main() {
 }
 
 func getConnection() *amqp.Connection {
+	amqpURL := os.Getenv("AMQP_URL")
+
 	connection, err := amqp.Dial(amqpURL)
 	failOnError(err, "Failed to connect to RabbitMQ")
 

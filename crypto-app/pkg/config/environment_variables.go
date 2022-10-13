@@ -1,11 +1,10 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"regexp"
-
-	"github.com/joho/godotenv"
+	"strings"
 )
 
 var (
@@ -31,15 +30,19 @@ func LoadEnv() {
 func loadFile() {
 	log.Println("Loading .env file")
 
-	projectDirName := "btc_application"
-	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
-	currentWorkDirectory, _ := os.Getwd()
-	rootPath := projectName.Find([]byte(currentWorkDirectory))
+	maxDirectoryDepth := 6
+	for i := 0; i < maxDirectoryDepth; i++ {
+		escapeSequence := strings.Repeat("../", i)
 
-	err := godotenv.Load(string(rootPath) + `/crypto-app/.env`)
-	if err != nil {
-		log.Fatal("Error loading .env file")
+		err := godotenv.Load("./" + escapeSequence + ".env")
+		if err == nil {
+			log.Println("Success")
+
+			return
+		}
 	}
+
+	log.Fatal("Failed to load .env file")
 }
 
 func loadVariables() {
@@ -54,5 +57,5 @@ func loadVariables() {
 	CryptoCurrencyProvider = os.Getenv("CRYPTO_CURRENCY_PROVIDER")
 	AdminKey = os.Getenv("ADMIN_KEY")
 
-	AmqpUrl = os.Getenv("APQP_URL")
+	AmqpUrl = os.Getenv("AMQP_URL")
 }
