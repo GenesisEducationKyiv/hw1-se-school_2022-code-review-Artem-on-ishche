@@ -16,6 +16,9 @@ var (
 	EmailAddress  string
 	EmailPassword string
 
+	CustomersServiceUrl string
+	CreateCustomerRoute string
+
 	NetworkPort            string
 	CryptoCurrencyProvider string
 	AdminKey               string
@@ -53,6 +56,9 @@ func loadVariables() {
 
 	EmailAddress = os.Getenv("EMAIL_ADDRESS")
 	EmailPassword = os.Getenv("EMAIL_PASSWORD")
+
+	CustomersServiceUrl = os.Getenv("CUSTOMERS_SERVICE_URL")
+	CreateCustomerRoute = os.Getenv("CREATE_CUSTOMERS_ROUTE")
 
 	NetworkPort = os.Getenv("NETWORK_PORT")
 	CryptoCurrencyProvider = os.Getenv("CRYPTO_CURRENCY_PROVIDER")

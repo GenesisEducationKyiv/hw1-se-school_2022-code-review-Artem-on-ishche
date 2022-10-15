@@ -17,6 +17,26 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+  dtm:
+    image: yedf/dtm
+    restart: always
+    ports:
+      - "36790:36790" # grpc
+      - "36789:36789" # ui
+    networks:
+      - crypto-network
+  mysql:
+    image: mysql:8
+    restart: always
+    ports:
+      - "8092:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=saga
+      - MYSQL_USER=saga
+      - MYSQL_PASSWORD=saga
+    networks:
+      - crypto-network
 
   crypto-app:
     build:
@@ -24,6 +44,8 @@ services:
       dockerfile: Dockerfile
     environment:
       - AMQP_URL=amqp://guest:guest@rabbitmq/
+      - CUSTOMERS_SERVICE_URL=http://customers:8080
+      - CREATE_CUSTOMERS_ROUTE=/create
     ports:
       - "8080:8080"
     networks:
@@ -45,6 +67,24 @@ services:
         condition: service_healthy
       crypto-app:
         condition: service_started
+
+  customers:
+    build:
+      context: customers-service
+      dockerfile: Dockerfile
+    environment:
+      - CREATE_CUSTOMERS_ROUTE=/create
+      - CUSTOMERS_SERVICE_URL=http://customers:8080
+      - CUSTOMERS_SERVICE_PORT=:8080
+      - DTM_COORDINATOR=http://dtm:36789/api/dtmsvr
+      - MYSQL_DSN=saga:saga@tcp(mysql:3306)/saga?charset=utf8mb4&parseTime=True&loc=Local
+    ports:
+      - "8090:8080"
+    networks:
+      - crypto-network
+    depends_on:
+      - dtm
+      - mysql
 
 networks:
   crypto-network:

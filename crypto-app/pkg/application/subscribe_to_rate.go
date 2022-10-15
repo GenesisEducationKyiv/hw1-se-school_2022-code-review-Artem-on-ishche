@@ -11,19 +11,21 @@ type RateSubscriptionService interface {
 	Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error
 }
 
-type rateSubscriptionServiceImpl struct {
-	repoGetter services.EmailAddressesRepositoryGetter
-	logger     services.Logger
+type RateSubscriptionServiceImpl struct {
+	repoGetter       services.EmailAddressesRepositoryGetter
+	customersService services.CustomersService
+	logger           services.Logger
 }
 
 func NewSubscribeToRateServiceImpl(
 	repoGetter services.EmailAddressesRepositoryGetter,
+	customersService services.CustomersService,
 	logger services.Logger,
-) *rateSubscriptionServiceImpl {
-	return &rateSubscriptionServiceImpl{repoGetter: repoGetter, logger: logger}
+) *RateSubscriptionServiceImpl {
+	return &RateSubscriptionServiceImpl{repoGetter: repoGetter, customersService: customersService, logger: logger}
 }
 
-func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error {
+func (s RateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress, currencyPair *models.CurrencyPair) error {
 	s.logger.Debug(fmt.Sprintf("Subscribe() called with emailAddress=%s, currencyPair={%s}",
 		emailAddress.String(), currencyPair.String()))
 
@@ -44,5 +46,12 @@ func (s rateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress
 	err = repository.Add(*emailAddress)
 	s.logger.Debug(fmt.Sprintf("repository.Add() returned err={%v}", err))
 
-	return nil
+	if err != nil {
+		return err
+	}
+
+	err = s.customersService.CreateCustomer(emailAddress)
+	s.logger.Debug(fmt.Sprintf("customersService.CreateCustomer() returned err={%v}", err))
+
+	return err
 }
