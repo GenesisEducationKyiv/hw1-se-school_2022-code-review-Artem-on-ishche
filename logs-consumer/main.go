@@ -10,7 +10,7 @@ import (
 const (
 	exchangeName = "logs"
 	queueName    = "logs-queue"
-	bindingKey   = "debug"
+	bindingKey   = "error"
 )
 
 func main() {
