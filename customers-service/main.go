@@ -8,8 +8,6 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
-
 	router := presentation.GetRouter()
 
 	log.Println("started")
