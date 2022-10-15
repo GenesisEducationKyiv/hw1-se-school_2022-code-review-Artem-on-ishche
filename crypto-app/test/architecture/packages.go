@@ -1,7 +1,7 @@
 package architecture
 
 var (
-	domainModels     = "gses2.app/api/pkg/domain/models"
+	domainModels     = "gses2.app/api/pkg/domain/model"
 	domainServices   = "gses2.app/api/pkg/domain/services"
 	application      = "gses2.app/api/pkg/application"
 	httpPresentation = "gses2.app/api/pkg/presentation/http"
