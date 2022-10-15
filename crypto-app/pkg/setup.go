@@ -1,12 +1,12 @@
 package pkg
 
 import (
-	"gses2.app/api/pkg/infrastructure/customers"
 	"time"
 
 	"gses2.app/api/pkg/application"
 	"gses2.app/api/pkg/config"
 	"gses2.app/api/pkg/domain/services"
+	"gses2.app/api/pkg/infrastructure/customers"
 	"gses2.app/api/pkg/infrastructure/email"
 	"gses2.app/api/pkg/infrastructure/rates"
 	"gses2.app/api/pkg/infrastructure/repos"

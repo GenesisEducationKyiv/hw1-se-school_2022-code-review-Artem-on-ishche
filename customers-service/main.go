@@ -2,14 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/dtm-labs/client/dtmcli"
 	"github.com/dtm-labs/dtm/dtmutil"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
-	"net/http"
-	"os"
 )
 
 // config

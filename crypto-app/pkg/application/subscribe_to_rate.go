@@ -45,6 +45,7 @@ func (s RateSubscriptionServiceImpl) Subscribe(emailAddress *models.EmailAddress
 
 	err = repository.Add(*emailAddress)
 	s.logger.Debug(fmt.Sprintf("repository.Add() returned err={%v}", err))
+
 	if err != nil {
 		return err
 	}

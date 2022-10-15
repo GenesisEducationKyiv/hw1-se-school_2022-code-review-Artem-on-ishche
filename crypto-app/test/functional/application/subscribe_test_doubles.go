@@ -72,7 +72,7 @@ func (g inMemoryEmailAddressesRepositoryGetter) GetAllEmailAddressesRepositories
 func getSubscribeService(addresses []models.EmailAddress) application.RateSubscriptionService {
 	storage := newInMemoryEmailAddressesStorage(addresses)
 	repoGetter := newInMemoryEmailAddressesRepositoryGetter(storage)
-	subscribeServiceImpl := application.NewSubscribeToRateServiceImpl(repoGetter, publicmocks.EmptyLogger)
+	subscribeServiceImpl := application.NewSubscribeToRateServiceImpl(repoGetter, publicmocks.EmptyCustomersService, publicmocks.EmptyLogger)
 
 	return subscribeServiceImpl
 }
