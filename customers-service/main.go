@@ -14,6 +14,7 @@ import (
 
 // config
 var (
+	createRoute           = os.Getenv("CREATE_CUSTOMERS_ROUTE")
 	dtmCoordinatorAddress = os.Getenv("DTM_COORDINATOR")
 	customersServerURL    = os.Getenv("CUSTOMERS_SERVICE_URL")
 	customersServerPort   = os.Getenv("CUSTOMERS_SERVICE_PORT")
@@ -33,12 +34,17 @@ func main() {
 	app := gin.New()
 
 	// public order api
-	app.POST("/create", func(c *gin.Context) {
+	app.POST(createRoute, func(c *gin.Context) {
+		log.Printf("%s route called", createRoute)
+		log.Println("query url was " + c.Request.URL.RawQuery)
+
 		createCustomerRequest := struct {
 			EmailAddress string `json:"emailAddress"`
 		}{}
 
-		err := c.BindJSON(&createCustomerRequest)
+		err := c.Bind(&createCustomerRequest)
+		log.Printf("binding JSON to parameters returned err={%v}", err)
+
 		if err != nil {
 			c.JSON(extractCode(err), err)
 			return
@@ -51,6 +57,8 @@ func main() {
 			Add(customersServerURL+"/register-customer", customersServerURL+"/register-customer-compensate", req).
 			Submit()
 
+		log.Printf("saga returned err = {%v}", err)
+
 		createCustomerResponse := struct {
 			Gid string `json:"gid"`
 		}{Gid: globalTransactionId}
@@ -60,33 +68,46 @@ func main() {
 
 	// internal order api
 	app.POST("/register-customer", dtmutil.WrapHandler2(func(c *gin.Context) interface{} {
+		log.Println("/register-customer route called")
+
+		transactionId := c.Query("gid")
+		log.Println("transactionId for this query is " + transactionId)
+
 		registerCustomerRequest := struct {
 			EmailAddress string `json:"email_address"`
 		}{}
-		transactionId := c.Query("gid")
-
 		err := c.BindJSON(&registerCustomerRequest)
+		log.Printf("binding JSON to parameters returned err={%v}", err)
 		if err != nil {
 			return err
 		}
 
-		return getDb().
+		err = getDb().
 			Create(&Customer{
 				IDTransaction: transactionId,
 				EmailAddress:  registerCustomerRequest.EmailAddress,
 				Status:        "created",
 			}).
 			Error
+		log.Printf("db create returned err={%v}", err)
+
+		return err
 	}))
 	app.POST("/register-customer-compensate", dtmutil.WrapHandler2(func(c *gin.Context) interface{} {
-		transactionId := c.Query("gid")
+		log.Println("/register-customer-compensate route called")
 
-		return getDb().
+		transactionId := c.Query("gid")
+		log.Println("transactionId for this query is " + transactionId)
+
+		err := getDb().
 			Model(&Customer{}).
 			Where("id_transaction = ?", transactionId).
 			Update("status", "canceled").
 			Limit(1).
 			Error
+		log.Printf("db update returned err={%v}", err)
+
+		return err
 	}))
 
 	log.Println("started")

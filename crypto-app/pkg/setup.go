@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"gses2.app/api/pkg/infrastructure/customers"
 	"time"
 
 	"gses2.app/api/pkg/application"
@@ -20,8 +21,9 @@ func InitServices(loggerService services.Logger) (
 	genericExchangeRateService := GetGenericExchangeRateService(loggerService)
 	repositoryGetter := repos.NewEmailAddressesFileRepoGetter(loggerService)
 	emailSender := email.GetEmailClient(loggerService)
+	customersService := customers.NewServiceImpl(config.CustomersServiceUrl, config.CreateCustomerRoute, loggerService)
 
-	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter, loggerService)
+	subscribeToRateService := application.NewSubscribeToRateServiceImpl(repositoryGetter, customersService, loggerService)
 	sendBtcToUahRateEmailsService := application.NewSendRateEmailsServiceImpl(
 		config.AdminKey,
 		genericExchangeRateService,

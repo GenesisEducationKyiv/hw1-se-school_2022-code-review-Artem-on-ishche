@@ -10,7 +10,7 @@ import (
 const (
 	exchangeName = "logs"
 	queueName    = "logs-queue"
-	bindingKey   = "error"
+	bindingKey   = "debug"
 )
 
 func main() {
@@ -90,7 +90,7 @@ func readForever(messages <-chan amqp.Delivery) {
 
 	go func() {
 		for d := range messages {
-			log.Printf(" [x] %s", d.Body)
+			log.Printf(" [ %s ] %s", exchangeName, d.Body)
 		}
 	}()
 

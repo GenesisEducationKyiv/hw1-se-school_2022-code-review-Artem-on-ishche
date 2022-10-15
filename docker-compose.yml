@@ -44,6 +44,8 @@ services:
       dockerfile: Dockerfile
     environment:
       - AMQP_URL=amqp://guest:guest@rabbitmq/
+      - CUSTOMERS_SERVICE_URL=http://customers:8080
+      - CREATE_CUSTOMERS_ROUTE=/create
     ports:
       - "8080:8080"
     networks:
@@ -71,9 +73,10 @@ services:
       context: customers-service
       dockerfile: Dockerfile
     environment:
-      - DTM_COORDINATOR=http://dtm:36789/api/dtmsvr
+      - CREATE_CUSTOMERS_ROUTE=/create
       - CUSTOMERS_SERVICE_URL=http://customers:8080
       - CUSTOMERS_SERVICE_PORT=:8080
+      - DTM_COORDINATOR=http://dtm:36789/api/dtmsvr
       - MYSQL_DSN=saga:saga@tcp(mysql:3306)/saga?charset=utf8mb4&parseTime=True&loc=Local
     ports:
       - "8090:8080"
